@@ -1,0 +1,16 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    clean-disabled: true
+
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+
+logging:
+  level:
+    root: WARN
+    com.hrplatform: INFO
