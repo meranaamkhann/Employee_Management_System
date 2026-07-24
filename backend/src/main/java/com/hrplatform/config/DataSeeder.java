@@ -54,19 +54,26 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedAdmin() {
-        if (userRepository.existsByEmailIgnoreCase(adminEmail)) {
-            return;
-        }
-        User admin = User.builder()
+    User admin = userRepository.findByEmailIgnoreCase(adminEmail).orElse(null);
+
+    if (admin == null) {
+        admin = User.builder()
                 .email(adminEmail)
-                .passwordHash(passwordEncoder.encode(adminPassword))
                 .role(UserRole.ADMIN)
                 .active(true)
                 .emailVerified(true)
                 .build();
-        userRepository.save(admin);
-        log.info("Seeded default admin account: {} (change this password immediately in production)", adminEmail);
     }
+
+    admin.setActive(true);
+    admin.setEmailVerified(true);
+    admin.setRole(UserRole.ADMIN);
+    admin.setPasswordHash(passwordEncoder.encode(adminPassword));
+
+    userRepository.save(admin);
+
+    log.info("Admin account ensured: {}", adminEmail);
+}
 
     private void seedDemoDataset() {
         Department engineering = departmentRepository.save(Department.builder()
