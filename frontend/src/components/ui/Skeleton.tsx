@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={clsx('animate-pulse rounded-md bg-paper-300/70', className)} />
+  return <div className={clsx('animate-pulse rounded-md bg-paper-300/70 dark:bg-ink-700/60', className)} />
 }
 
 export function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: number }) {

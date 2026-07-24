@@ -129,3 +129,14 @@ export interface DashboardStats {
     joiningDate: string
   }[]
 }
+
+export interface UserAccount {
+  id: string
+  email: string
+  role: Role
+  active: boolean
+  emailVerified: boolean
+  employeeId?: string
+  employeeName?: string
+  createdAt: string
+}

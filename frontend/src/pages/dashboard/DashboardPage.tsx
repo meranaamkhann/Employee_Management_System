@@ -19,8 +19,8 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl text-ink-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-ink-600">A snapshot of your workforce, right now.</p>
+        <h1 className="font-display text-2xl text-ink-900 dark:text-paper-50">Dashboard</h1>
+        <p className="mt-1 text-sm text-ink-600 dark:text-paper-300/60">A snapshot of your workforce, right now.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -34,16 +34,16 @@ export default function DashboardPage() {
             <Card>
               <CardBody className="flex items-start justify-between pt-6">
                 <div>
-                  <p className="text-sm text-ink-600">{stat.label}</p>
+                  <p className="text-sm text-ink-600 dark:text-paper-300/60">{stat.label}</p>
                   {isLoading ? (
                     <Skeleton className="mt-2 h-8 w-16" />
                   ) : (
-                    <p className="mt-1 font-display text-3xl text-ink-900">
+                    <p className="mt-1 font-display text-3xl text-ink-900 dark:text-paper-50">
                       {stat.format(stats ? (stats[stat.key] as number) : 0)}
                     </p>
                   )}
                 </div>
-                <div className="rounded-lg bg-paper-200 p-2 text-ink-700">
+                <div className="rounded-lg bg-paper-200 p-2 text-ink-700 dark:bg-ink-800 dark:text-paper-200">
                   <stat.icon size={18} />
                 </div>
               </CardBody>
@@ -55,7 +55,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader>
-            <h2 className="font-display text-lg text-ink-900">Headcount by department</h2>
+            <h2 className="font-display text-lg text-ink-900 dark:text-paper-50">Headcount by department</h2>
           </CardHeader>
           <CardBody className="pt-4">
             {isLoading ? (
@@ -79,7 +79,7 @@ export default function DashboardPage() {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <h2 className="font-display text-lg text-ink-900">Recent hires</h2>
+            <h2 className="font-display text-lg text-ink-900 dark:text-paper-50">Recent hires</h2>
           </CardHeader>
           <CardBody className="pt-4">
             {isLoading ? (
@@ -89,21 +89,21 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : stats?.recentHires.length ? (
-              <ul className="flex flex-col divide-y divide-paper-200">
+              <ul className="flex flex-col divide-y divide-paper-200 dark:divide-ink-700">
                 {stats.recentHires.map((hire) => (
                   <li key={hire.employeeId} className="flex items-center justify-between py-3">
                     <div>
-                      <p className="text-sm font-medium text-ink-900">{hire.fullName}</p>
-                      <p className="text-xs text-ink-600">
+                      <p className="text-sm font-medium text-ink-900 dark:text-paper-50">{hire.fullName}</p>
+                      <p className="text-xs text-ink-600 dark:text-paper-300/50">
                         {hire.designation ?? '—'} · {hire.departmentName ?? 'Unassigned'}
                       </p>
                     </div>
-                    <span className="text-xs text-ink-600">{formatDate(hire.joiningDate)}</span>
+                    <span className="text-xs text-ink-600 dark:text-paper-300/50">{formatDate(hire.joiningDate)}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="py-8 text-center text-sm text-ink-600">No hires recorded yet.</p>
+              <p className="py-8 text-center text-sm text-ink-600 dark:text-paper-300/50">No hires recorded yet.</p>
             )}
           </CardBody>
         </Card>
@@ -111,13 +111,13 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <h2 className="font-display text-lg text-ink-900">Monthly payroll (active employees)</h2>
+          <h2 className="font-display text-lg text-ink-900 dark:text-paper-50">Monthly payroll (active employees)</h2>
         </CardHeader>
         <CardBody className="pt-2">
           {isLoading ? (
             <Skeleton className="h-10 w-40" />
           ) : (
-            <p className="font-display text-3xl text-ink-900">{formatCurrency(stats?.totalMonthlySalary)}</p>
+            <p className="font-display text-3xl text-ink-900 dark:text-paper-50">{formatCurrency(stats?.totalMonthlySalary)}</p>
           )}
         </CardBody>
       </Card>

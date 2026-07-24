@@ -29,15 +29,21 @@ On first boot, the backend seeds:
 - A small demo dataset (2 departments, 3 employees) — disable with
   `SEED_DEMO_DATA=false`
 
-## Local development (without Docker)
+## Local development (backend against Dockerized Postgres, frontend via Vite)
 
 **Backend**
 ```bash
+# Start only Postgres from the compose file — no need to run the whole stack:
+docker compose up -d postgres
+
 cd backend
-# requires a running PostgreSQL matching src/main/resources/application.yml,
-# or override via DB_URL / DB_USERNAME / DB_PASSWORD env vars
 mvn spring-boot:run
 ```
+This works out of the box because `application.yml`'s datasource defaults
+(`hr_platform` / `hr_platform` / `hr_platform`) are the same values
+`docker-compose.yml` initializes the `postgres` service with. If you point
+`DB_URL` at a different Postgres instance instead, make sure that instance
+actually has a matching role/password — Spring won't create one for you.
 
 **Frontend**
 ```bash
@@ -45,6 +51,28 @@ cd frontend
 npm install
 npm run dev
 ```
+
+### Troubleshooting: `password authentication failed for user "hr_platform"`
+
+This is **not** a config bug — `application.yml`, `docker-compose.yml`, and
+the `.env` values all agree on the same credentials. This error means the
+Postgres *data volume* was already initialized under different credentials
+at some point in the past. Postgres only applies
+`POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` the first time it
+initializes an empty data directory — never again after that, even if you
+edit compose files or `.env` afterward. So if this stack (or a local
+Postgres instance) was ever started before these values were finalized, the
+container is silently stuck on stale credentials.
+
+Fix:
+```bash
+./scripts/reset-db.sh
+```
+This drops the `postgres_data` volume and re-initializes it cleanly. If
+you're running Postgres outside Docker instead, the equivalent fix is to log
+in as a superuser and run `ALTER ROLE hr_platform WITH PASSWORD 'hr_platform';`
+(or update `DB_USERNAME`/`DB_PASSWORD` to match whatever that role's actual
+password already is).
 Vite proxies `/api` to `localhost:8080` in dev (see `vite.config.ts`), so no
 CORS configuration is needed locally.
 

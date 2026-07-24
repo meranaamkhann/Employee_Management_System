@@ -15,8 +15,8 @@ export function EmptyState({
     <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
       {icon && <div className="text-ink-600/40">{icon}</div>}
       <div className="space-y-1">
-        <p className="font-medium text-ink-900">{title}</p>
-        {description && <p className="text-sm text-ink-600">{description}</p>}
+        <p className="font-medium text-ink-900 dark:text-paper-50">{title}</p>
+        {description && <p className="text-sm text-ink-600 dark:text-paper-300/60">{description}</p>}
       </div>
       {action}
     </div>

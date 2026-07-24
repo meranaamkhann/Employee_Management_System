@@ -5,6 +5,8 @@ import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
 import DashboardPage from '@/pages/dashboard/DashboardPage'
 import EmployeesPage from '@/pages/employees/EmployeesPage'
 import DepartmentsPage from '@/pages/departments/DepartmentsPage'
+import ProfilePage from '@/pages/profile/ProfilePage'
+import SettingsPage from '@/pages/settings/SettingsPage'
 import NotFoundPage from '@/pages/errors/NotFoundPage'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
@@ -23,6 +25,8 @@ export default function App() {
             <Route path="employees" element={<EmployeesPage />} />
           </Route>
           <Route path="departments" element={<DepartmentsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
 

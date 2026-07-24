@@ -53,8 +53,8 @@ export default function DepartmentsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl text-ink-900">Departments</h1>
-          <p className="mt-1 text-sm text-ink-600">Organize your workforce into teams.</p>
+          <h1 className="font-display text-2xl text-ink-900 dark:text-paper-50">Departments</h1>
+          <p className="mt-1 text-sm text-ink-600 dark:text-paper-300/60">Organize your workforce into teams.</p>
         </div>
         {canEdit && (
           <Button onClick={openCreate}>
@@ -77,14 +77,14 @@ export default function DepartmentsPage() {
             <Card key={dept.id}>
               <CardBody className="pt-6">
                 <div className="flex items-start justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-paper-200 text-ink-800">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-paper-200 text-ink-800 dark:bg-ink-800 dark:text-paper-100">
                     <Building2 size={18} />
                   </div>
                   {canEdit && (
                     <div className="flex gap-1">
                       <button
                         onClick={() => openEdit(dept)}
-                        className="rounded-lg p-1.5 text-ink-600 hover:bg-paper-200 hover:text-ink-900"
+                        className="rounded-lg p-1.5 text-ink-600 hover:bg-paper-200 hover:text-ink-900 dark:text-paper-300/60 dark:hover:bg-ink-800 dark:hover:text-paper-50"
                         aria-label={`Edit ${dept.name}`}
                       >
                         <Pencil size={14} />
@@ -99,14 +99,14 @@ export default function DepartmentsPage() {
                     </div>
                   )}
                 </div>
-                <h3 className="mt-4 font-display text-lg text-ink-900">{dept.name}</h3>
-                {dept.description && <p className="mt-1 text-sm text-ink-600">{dept.description}</p>}
-                <div className="mt-4 flex items-center gap-1.5 text-sm text-ink-700">
+                <h3 className="mt-4 font-display text-lg text-ink-900 dark:text-paper-50">{dept.name}</h3>
+                {dept.description && <p className="mt-1 text-sm text-ink-600 dark:text-paper-300/60">{dept.description}</p>}
+                <div className="mt-4 flex items-center gap-1.5 text-sm text-ink-700 dark:text-paper-300/80">
                   <Users size={14} />
                   {dept.employeeCount} employee{dept.employeeCount === 1 ? '' : 's'}
                 </div>
                 {dept.headEmployeeName && (
-                  <p className="mt-1 text-sm text-ink-600">Head: {dept.headEmployeeName}</p>
+                  <p className="mt-1 text-sm text-ink-600 dark:text-paper-300/60">Head: {dept.headEmployeeName}</p>
                 )}
               </CardBody>
             </Card>
@@ -182,9 +182,9 @@ function DepartmentFormModal({
         )}
         <Input label="Department name" error={errors.name?.message} {...register('name')} />
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-ink-800">Description</label>
+          <label className="text-sm font-medium text-ink-800 dark:text-paper-200">Description</label>
           <textarea
-            className="min-h-20 w-full rounded-lg border border-paper-300 bg-white px-3.5 py-2.5 text-sm focus:border-brass-500 focus:outline-none focus:ring-2 focus:ring-brass-400/50"
+            className="min-h-20 w-full rounded-lg border border-paper-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 focus:border-brass-500 focus:outline-none focus:ring-2 focus:ring-brass-400/50 dark:border-ink-600 dark:bg-ink-800 dark:text-paper-50"
             {...register('description')}
           />
         </div>

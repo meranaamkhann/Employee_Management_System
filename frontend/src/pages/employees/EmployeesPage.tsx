@@ -70,8 +70,8 @@ export default function EmployeesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl text-ink-900">Employees</h1>
-          <p className="mt-1 text-sm text-ink-600">
+          <h1 className="font-display text-2xl text-ink-900 dark:text-paper-50">Employees</h1>
+          <p className="mt-1 text-sm text-ink-600 dark:text-paper-300/60">
             {user?.role === 'MANAGER' ? 'Your direct reports.' : 'Everyone in the organization.'}
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function EmployeesPage() {
       </div>
 
       <Card>
-        <div className="flex flex-col gap-3 border-b border-paper-200 p-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3 border-b border-paper-200 p-4 dark:border-ink-700 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-600/50" />
             <input
@@ -93,7 +93,7 @@ export default function EmployeesPage() {
                 setPage(0)
               }}
               placeholder="Search by name, email, code, or designation…"
-              className="w-full rounded-lg border border-paper-300 bg-white py-2.5 pl-9 pr-3.5 text-sm focus:border-brass-500 focus:outline-none focus:ring-2 focus:ring-brass-400/50"
+              className="w-full rounded-lg border border-paper-300 bg-white py-2.5 pl-9 pr-3.5 text-sm text-ink-900 focus:border-brass-500 focus:outline-none focus:ring-2 focus:ring-brass-400/50 dark:border-ink-600 dark:bg-ink-800 dark:text-paper-50"
             />
           </div>
           <Select
@@ -129,7 +129,7 @@ export default function EmployeesPage() {
 
         {canEdit && selectedIds.length > 0 && (
           <div className="flex items-center justify-between bg-brass-400/10 px-6 py-3">
-            <p className="text-sm font-medium text-ink-900">{selectedIds.length} selected</p>
+            <p className="text-sm font-medium text-ink-900 dark:text-paper-50">{selectedIds.length} selected</p>
             <Button variant="danger" size="sm" onClick={handleBulkDelete}>
               <Trash2 size={14} /> Delete selected
             </Button>
@@ -148,7 +148,7 @@ export default function EmployeesPage() {
           <div className={isPlaceholderData ? 'opacity-60 transition-opacity' : ''}>
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-paper-200 text-xs uppercase tracking-wide text-ink-600">
+                <tr className="border-b border-paper-200 text-xs uppercase tracking-wide text-ink-600 dark:border-ink-700 dark:text-paper-300/50">
                   {canEdit && <th className="w-10 px-6 py-3" />}
                   <th className="px-3 py-3">Employee</th>
                   <th className="px-3 py-3">Department</th>
@@ -160,7 +160,7 @@ export default function EmployeesPage() {
               </thead>
               <tbody>
                 {data.content.map((employee) => (
-                  <tr key={employee.id} className="border-b border-paper-200/70 last:border-0 hover:bg-paper-100/60">
+                  <tr key={employee.id} className="border-b border-paper-200/70 last:border-0 hover:bg-paper-100/60 dark:border-ink-700/70 dark:hover:bg-ink-800/60">
                     {canEdit && (
                       <td className="px-6 py-3.5">
                         <input
@@ -173,18 +173,18 @@ export default function EmployeesPage() {
                     )}
                     <td className="px-3 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper-200 text-xs font-medium text-ink-800">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper-200 text-xs font-medium text-ink-800 dark:bg-ink-800 dark:text-paper-100">
                           {initials(employee.fullName)}
                         </div>
                         <div>
-                          <p className="font-medium text-ink-900">{employee.fullName}</p>
-                          <p className="font-mono text-xs text-ink-600">{employee.employeeCode}</p>
+                          <p className="font-medium text-ink-900 dark:text-paper-50">{employee.fullName}</p>
+                          <p className="font-mono text-xs text-ink-600 dark:text-paper-300/50">{employee.employeeCode}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3.5 text-ink-700">{employee.department?.name ?? '—'}</td>
-                    <td className="px-3 py-3.5 text-ink-700">{employee.designation ?? '—'}</td>
-                    <td className="px-3 py-3.5 font-mono text-ink-700">{formatCurrency(employee.salary)}</td>
+                    <td className="px-3 py-3.5 text-ink-700 dark:text-paper-300/80">{employee.department?.name ?? '—'}</td>
+                    <td className="px-3 py-3.5 text-ink-700 dark:text-paper-300/80">{employee.designation ?? '—'}</td>
+                    <td className="px-3 py-3.5 font-mono text-ink-700 dark:text-paper-300/80">{formatCurrency(employee.salary)}</td>
                     <td className="px-3 py-3.5">
                       <StatusBadge status={employee.status} />
                     </td>
@@ -193,7 +193,7 @@ export default function EmployeesPage() {
                         <div className="flex justify-end gap-1">
                           <button
                             onClick={() => openEdit(employee)}
-                            className="rounded-lg p-2 text-ink-600 hover:bg-paper-200 hover:text-ink-900"
+                            className="rounded-lg p-2 text-ink-600 hover:bg-paper-200 hover:text-ink-900 dark:text-paper-300/60 dark:hover:bg-ink-800 dark:hover:text-paper-50"
                             aria-label={`Edit ${employee.fullName}`}
                           >
                             <Pencil size={15} />

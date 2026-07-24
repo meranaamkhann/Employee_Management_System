@@ -26,7 +26,7 @@ export function StatusBadge({ status }: { status: EmploymentStatus }) {
 
 export function RoleBadge({ role }: { role: string }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-ink-900/5 px-2.5 py-1 text-xs font-medium text-ink-800 ring-1 ring-ink-900/10">
+    <span className="inline-flex items-center rounded-full bg-ink-900/5 px-2.5 py-1 text-xs font-medium text-ink-800 ring-1 ring-ink-900/10 dark:bg-white/5 dark:text-paper-200 dark:ring-white/10">
       {role}
     </span>
   )
