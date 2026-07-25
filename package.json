@@ -1,0 +1,10 @@
+{
+  "name": "rosterly-hr-platform",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Convenience scripts for local setup. The real apps live in backend/ and frontend/.",
+  "scripts": {
+    "check-env": "node scripts/check-env.js",
+    "reset-db": "node scripts/reset-db.js"
+  }
+}

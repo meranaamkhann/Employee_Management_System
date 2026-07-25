@@ -35,6 +35,14 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    /**
+     * Only meaningful when {@link #employee} is null — set at self-registration
+     * so the account has a human-readable name before HR links (or creates) a
+     * full Employee record for them. Once linked, the Employee's fullName is
+     * the source of truth and this field is no longer read by the frontend.
+     */
+    private String displayName;
+
     @Column(nullable = false)
     private String passwordHash;
 

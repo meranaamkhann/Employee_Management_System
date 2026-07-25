@@ -1,6 +1,6 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import clsx from 'clsx'
-import { LayoutDashboard, Users, Building2, LogOut, Sun, Moon, User, Settings } from 'lucide-react'
+import { LayoutDashboard, Users, Building2, LogOut, Sun, Moon, User, Settings, History } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { useTheme } from '@/lib/theme-context'
 
@@ -8,8 +8,9 @@ const navItems = [
   { to: '/app/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'HR', 'MANAGER'] },
   { to: '/app/employees', label: 'Employees', icon: Users, roles: ['ADMIN', 'HR', 'MANAGER'] },
   { to: '/app/departments', label: 'Departments', icon: Building2, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
-  { to: '/app/profile', label: 'Profile', icon: User, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
-  { to: '/app/settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
+  { to: '/app/activity', label: 'Activity', icon: History, roles: ['ADMIN', 'IT_ADMIN'] },
+  { to: '/app/profile', label: 'Profile', icon: User, roles: ['ADMIN', 'IT_ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
+  { to: '/app/settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'IT_ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
 ]
 
 export function Sidebar() {
@@ -19,12 +20,12 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-64 flex-col justify-between border-r border-paper-300/70 bg-white px-4 py-6 dark:border-ink-700/70 dark:bg-ink-900">
       <div>
-        <div className="mb-8 flex items-center gap-2 px-2">
+        <Link to="/" className="mb-8 flex items-center gap-2 px-2 transition-opacity hover:opacity-80">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-900 dark:bg-brass-400">
             <span className="font-display text-sm font-semibold text-brass-400 dark:text-ink-950">R</span>
           </div>
           <span className="font-display text-lg font-medium text-ink-900 dark:text-paper-50">Rosterly</span>
-        </div>
+        </Link>
 
         <nav className="flex flex-col gap-1">
           {navItems

@@ -53,4 +53,7 @@ public class Department {
     private Instant updatedAt;
 
     private Instant deletedAt;
+
+    @Version
+    private Long version;
 }

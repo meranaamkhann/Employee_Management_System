@@ -4,11 +4,9 @@ import com.hrplatform.dashboard.dto.DashboardStatsResponse;
 import com.hrplatform.department.Department;
 import com.hrplatform.department.DepartmentRepository;
 import com.hrplatform.employee.Employee;
-import com.hrplatform.employee.EmploymentStatus;
 import com.hrplatform.employee.EmployeeRepository;
-import com.hrplatform.employee.EmployeeSpecifications;
+import com.hrplatform.employee.EmploymentStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Every number here comes from an aggregate query (COUNT/SUM/GROUP BY, or a
+ * bounded top-N fetch) rather than loading the employee table into memory
+ * and summarizing it in Java — the previous version did the latter, which
+ * gets slower with every employee added instead of staying flat.
+ */
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
@@ -29,35 +33,35 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public DashboardStatsResponse getStats() {
-        Specification<Employee> notDeleted = EmployeeSpecifications.notDeleted();
-        List<Employee> employees = employeeRepository.findAll(notDeleted);
+        long totalEmployees = employeeRepository.countByDeletedFalse();
 
-        Map<String, Long> byStatus = employees.stream()
-                .collect(Collectors.groupingBy(e -> e.getStatus().name(), Collectors.counting()));
+        Map<String, Long> byStatus = employeeRepository.countActiveGroupedByStatus().stream()
+                .collect(Collectors.toMap(
+                        row -> row.getStatus().name(),
+                        EmployeeRepository.StatusHeadcount::getEmployeeCount));
 
         YearMonth thisMonth = YearMonth.now();
-        long newHires = employees.stream()
-                .filter(e -> e.getJoiningDate() != null && YearMonth.from(e.getJoiningDate()).equals(thisMonth))
-                .count();
+        long newHires = employeeRepository.countByDeletedFalseAndJoiningDateBetween(
+                thisMonth.atDay(1), thisMonth.atEndOfMonth());
 
-        BigDecimal totalSalary = employees.stream()
-                .filter(e -> e.getStatus() == EmploymentStatus.ACTIVE && e.getSalary() != null)
-                .map(Employee::getSalary)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalSalary = employeeRepository.sumActiveSalaries();
+
+        Map<String, Long> headcountByDeptId = employeeRepository.countActiveGroupedByDepartment().stream()
+                .collect(Collectors.toMap(
+                        EmployeeRepository.DepartmentHeadcount::getDepartmentId,
+                        EmployeeRepository.DepartmentHeadcount::getEmployeeCount));
 
         List<Department> departments = departmentRepository.findByDeletedFalseOrderByNameAsc();
         List<DashboardStatsResponse.DepartmentDistribution> distribution = departments.stream()
                 .map(d -> DashboardStatsResponse.DepartmentDistribution.builder()
                         .departmentName(d.getName())
-                        .employeeCount(employeeRepository.countByDepartmentIdAndDeletedFalse(d.getId()))
+                        .employeeCount(headcountByDeptId.getOrDefault(d.getId(), 0L))
                         .build())
                 .sorted(Comparator.comparingLong(DashboardStatsResponse.DepartmentDistribution::getEmployeeCount).reversed())
                 .toList();
 
-        List<DashboardStatsResponse.RecentHire> recentHires = employees.stream()
-                .filter(e -> e.getJoiningDate() != null)
-                .sorted(Comparator.comparing(Employee::getJoiningDate).reversed())
-                .limit(5)
+        List<Employee> topRecentHires = employeeRepository.findTop5ByDeletedFalseAndJoiningDateIsNotNullOrderByJoiningDateDesc();
+        List<DashboardStatsResponse.RecentHire> recentHires = topRecentHires.stream()
                 .map(e -> DashboardStatsResponse.RecentHire.builder()
                         .employeeId(e.getId())
                         .fullName(e.getFullName())
@@ -68,7 +72,7 @@ public class DashboardService {
                 .toList();
 
         return DashboardStatsResponse.builder()
-                .totalEmployees(employees.size())
+                .totalEmployees(totalEmployees)
                 .activeEmployees(byStatus.getOrDefault(EmploymentStatus.ACTIVE.name(), 0L))
                 .onLeaveEmployees(byStatus.getOrDefault(EmploymentStatus.ON_LEAVE.name(), 0L))
                 .newHiresThisMonth(newHires)

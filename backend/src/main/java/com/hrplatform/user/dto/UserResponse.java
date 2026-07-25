@@ -18,5 +18,6 @@ public class UserResponse {
     private boolean emailVerified;
     private String employeeId;
     private String employeeName;
+    private String displayName;
     private Instant createdAt;
 }

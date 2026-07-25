@@ -5,9 +5,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { loginSchema, LoginFormValues } from '@/lib/schemas'
 import { useAuth } from '@/lib/auth-context'
-import { getErrorMessage } from '@/lib/format'
+import { getDefaultRouteForRole } from '@/lib/routing'
+import { getErrorMessage, getFieldErrors } from '@/lib/format'
 import { Input } from '@/components/ui/Input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/Button'
+import { ThemeToggleButton } from '@/components/ui/ThemeToggleButton'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -17,21 +20,35 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) })
 
   async function onSubmit(values: LoginFormValues) {
     setServerError(null)
     try {
-      await login(values.email, values.password)
-      navigate('/app/dashboard')
+      const authUser = await login(values.email, values.password)
+      navigate(getDefaultRouteForRole(authUser.role))
     } catch (err) {
-      setServerError(getErrorMessage(err, 'Email or password is incorrect.'))
+      // Surface the SPECIFIC field reason from the backend (e.g. "Email must
+      // be a valid address") instead of only the generic top-level message —
+      // otherwise a validation failure looks identical to a typo with no clue
+      // which field caused it.
+      const fieldErrors = getFieldErrors(err)
+      if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+        Object.entries(fieldErrors).forEach(([field, message]) => {
+          if (field === 'email' || field === 'password') {
+            setError(field as keyof LoginFormValues, { message })
+          }
+        })
+      } else {
+        setServerError(getErrorMessage(err, 'Email or password is incorrect.'))
+      }
     }
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-paper-100 dark:bg-ink-950">
       <div className="flex w-full flex-col justify-center px-8 py-12 sm:px-16 lg:w-1/2 lg:px-24">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -39,15 +56,18 @@ export default function LoginPage() {
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto w-full max-w-sm"
         >
-          <Link to="/" className="mb-10 flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-900">
-              <span className="font-display text-sm font-semibold text-brass-400">R</span>
-            </div>
-            <span className="font-display text-lg font-medium text-ink-900">Rosterly</span>
-          </Link>
+          <div className="mb-10 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-900 dark:bg-brass-400">
+                <span className="font-display text-sm font-semibold text-brass-400 dark:text-ink-950">R</span>
+              </div>
+              <span className="font-display text-lg font-medium text-ink-900 dark:text-paper-50">Rosterly</span>
+            </Link>
+            <ThemeToggleButton />
+          </div>
 
-          <h1 className="font-display text-2xl text-ink-900">Welcome back</h1>
-          <p className="mt-1.5 text-sm text-ink-600">Sign in to your workspace.</p>
+          <h1 className="font-display text-2xl text-ink-900 dark:text-paper-50">Welcome back</h1>
+          <p className="mt-1.5 text-sm text-ink-600 dark:text-paper-300/60">Sign in to your workspace.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 flex flex-col gap-4">
             {serverError && (
@@ -63,16 +83,15 @@ export default function LoginPage() {
               error={errors.email?.message}
               {...register('email')}
             />
-            <Input
+            <PasswordInput
               label="Password"
-              type="password"
               autoComplete="current-password"
               placeholder="••••••••"
               error={errors.password?.message}
               {...register('password')}
             />
             <div className="flex justify-end">
-              <Link to="/forgot-password" className="text-sm text-ink-600 hover:text-ink-900">
+              <Link to="/forgot-password" className="text-sm text-ink-600 hover:text-ink-900 dark:text-paper-300/60 dark:hover:text-paper-50">
                 Forgot password?
               </Link>
             </div>
@@ -81,7 +100,14 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-8 text-xs text-ink-600">
+          <p className="mt-6 text-center text-sm text-ink-600 dark:text-paper-300/60">
+            Don't have an account?{' '}
+            <Link to="/register" className="font-medium text-ink-900 underline dark:text-paper-50">
+              Sign up
+            </Link>
+          </p>
+
+          <p className="mt-6 text-xs text-ink-600 dark:text-paper-300/50">
             Demo credentials: <span className="font-mono">admin@hrplatform.local</span> — ask your admin
             for the seeded password.
           </p>

@@ -1,5 +1,8 @@
 package com.hrplatform.department;
 
+import com.hrplatform.audit.AuditAction;
+import com.hrplatform.audit.AuditEntityType;
+import com.hrplatform.audit.AuditService;
 import com.hrplatform.common.ApiException;
 import com.hrplatform.common.ErrorCode;
 import com.hrplatform.department.dto.DepartmentRequest;
@@ -13,6 +16,8 @@ import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +25,21 @@ public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public List<DepartmentResponse> listAll() {
-        return departmentRepository.findByDeletedFalseOrderByNameAsc().stream()
-                .map(this::toResponse)
+        List<Department> departments = departmentRepository.findByDeletedFalseOrderByNameAsc();
+
+        // One query for every department's headcount instead of one query
+        // per department (see EmployeeRepository.countActiveGroupedByDepartment).
+        Map<String, Long> headcounts = employeeRepository.countActiveGroupedByDepartment().stream()
+                .collect(Collectors.toMap(
+                        EmployeeRepository.DepartmentHeadcount::getDepartmentId,
+                        EmployeeRepository.DepartmentHeadcount::getEmployeeCount));
+
+        return departments.stream()
+                .map(d -> toResponse(d, headcounts.getOrDefault(d.getId(), 0L)))
                 .toList();
     }
 
@@ -32,7 +47,8 @@ public class DepartmentService {
     public DepartmentResponse getById(String id) {
         Department department = departmentRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> ApiException.notFound("Department not found."));
-        return toResponse(department);
+        long count = employeeRepository.countByDepartmentIdAndDeletedFalse(id);
+        return toResponse(department, count);
     }
 
     @Transactional
@@ -47,7 +63,10 @@ public class DepartmentService {
 
         applyHead(department, request.getHeadEmployeeId());
 
-        return toResponse(departmentRepository.save(department));
+        Department saved = departmentRepository.save(department);
+        auditService.record(AuditEntityType.DEPARTMENT, saved.getId(), AuditAction.CREATE,
+                "Created department " + saved.getName());
+        return toResponse(saved, 0);
     }
 
     @Transactional
@@ -62,7 +81,11 @@ public class DepartmentService {
         department.setBudget(request.getBudget());
         applyHead(department, request.getHeadEmployeeId());
 
-        return toResponse(departmentRepository.save(department));
+        Department saved = departmentRepository.save(department);
+        auditService.record(AuditEntityType.DEPARTMENT, saved.getId(), AuditAction.UPDATE,
+                "Updated department " + saved.getName());
+        long count = employeeRepository.countByDepartmentIdAndDeletedFalse(id);
+        return toResponse(saved, count);
     }
 
     @Transactional
@@ -79,6 +102,8 @@ public class DepartmentService {
         department.setDeleted(true);
         department.setDeletedAt(Instant.now());
         departmentRepository.save(department);
+        auditService.record(AuditEntityType.DEPARTMENT, department.getId(), AuditAction.DELETE,
+                "Deleted department " + department.getName());
     }
 
     private void applyHead(Department department, String headEmployeeId) {
@@ -100,8 +125,7 @@ public class DepartmentService {
         }
     }
 
-    private DepartmentResponse toResponse(Department department) {
-        long count = employeeRepository.countByDepartmentIdAndDeletedFalse(department.getId());
+    private DepartmentResponse toResponse(Department department, long employeeCount) {
         return DepartmentResponse.builder()
                 .id(department.getId())
                 .name(department.getName())
@@ -109,7 +133,7 @@ public class DepartmentService {
                 .headEmployeeId(department.getHead() != null ? department.getHead().getId() : null)
                 .headEmployeeName(department.getHead() != null ? department.getHead().getFullName() : null)
                 .budget(department.getBudget())
-                .employeeCount(count)
+                .employeeCount(employeeCount)
                 .createdAt(department.getCreatedAt())
                 .updatedAt(department.getUpdatedAt())
                 .build();

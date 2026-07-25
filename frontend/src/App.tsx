@@ -1,12 +1,15 @@
 import { Routes, Route } from 'react-router-dom'
 import LandingPage from '@/pages/landing/LandingPage'
 import LoginPage from '@/pages/auth/LoginPage'
+import RegisterPage from '@/pages/auth/RegisterPage'
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
+import ResetPasswordPage from '@/pages/auth/ResetPasswordPage'
 import DashboardPage from '@/pages/dashboard/DashboardPage'
 import EmployeesPage from '@/pages/employees/EmployeesPage'
 import DepartmentsPage from '@/pages/departments/DepartmentsPage'
 import ProfilePage from '@/pages/profile/ProfilePage'
 import SettingsPage from '@/pages/settings/SettingsPage'
+import ActivityPage from '@/pages/activity/ActivityPage'
 import NotFoundPage from '@/pages/errors/NotFoundPage'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
@@ -16,7 +19,9 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/app" element={<AppLayout />}>
@@ -27,6 +32,9 @@ export default function App() {
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'IT_ADMIN']} />}>
+            <Route path="activity" element={<ActivityPage />} />
+          </Route>
         </Route>
       </Route>
 

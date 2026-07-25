@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'HR' | 'MANAGER' | 'EMPLOYEE'
+export type Role = 'ADMIN' | 'IT_ADMIN' | 'HR' | 'MANAGER' | 'EMPLOYEE'
 
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER' | 'UNDISCLOSED'
 
@@ -35,6 +35,7 @@ export interface AuthResponse {
   email: string
   role: Role
   employeeId: string | null
+  displayName?: string | null
 }
 
 export interface DepartmentSummary {
@@ -138,5 +139,20 @@ export interface UserAccount {
   emailVerified: boolean
   employeeId?: string
   employeeName?: string
+  displayName?: string
+  createdAt: string
+}
+
+export type AuditEntityType = 'EMPLOYEE' | 'DEPARTMENT' | 'USER_ACCOUNT'
+export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'RESTORE' | 'DEACTIVATE' | 'ROLE_CHANGE' | 'LOGIN'
+
+export interface AuditLogEntry {
+  id: string
+  entityType: AuditEntityType
+  entityId?: string
+  action: AuditAction
+  performedByEmail: string
+  performedByRole?: string
+  summary?: string
   createdAt: string
 }

@@ -1,5 +1,8 @@
 package com.hrplatform.user;
 
+import com.hrplatform.audit.AuditAction;
+import com.hrplatform.audit.AuditEntityType;
+import com.hrplatform.audit.AuditService;
 import com.hrplatform.common.ApiException;
 import com.hrplatform.common.ErrorCode;
 import com.hrplatform.employee.Employee;
@@ -20,6 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public List<UserResponse> listAll() {
@@ -47,7 +51,10 @@ public class UserService {
                 .employee(employee)
                 .build();
 
-        return toResponse(userRepository.save(user));
+        User saved = userRepository.save(user);
+        auditService.record(AuditEntityType.USER_ACCOUNT, saved.getId(), AuditAction.CREATE,
+                "Created account " + saved.getEmail() + " with role " + saved.getRole());
+        return toResponse(saved);
     }
 
     @Transactional
@@ -68,6 +75,8 @@ public class UserService {
 
         user.setActive(false);
         userRepository.save(user);
+        auditService.record(AuditEntityType.USER_ACCOUNT, user.getId(), AuditAction.DEACTIVATE,
+                "Deactivated account " + user.getEmail());
     }
 
     @Transactional
@@ -84,8 +93,11 @@ public class UserService {
                     "At least one active admin account must remain.");
         }
 
+        UserRole previousRole = user.getRole();
         user.setRole(newRole);
         userRepository.save(user);
+        auditService.record(AuditEntityType.USER_ACCOUNT, user.getId(), AuditAction.ROLE_CHANGE,
+                "Changed " + user.getEmail() + " from " + previousRole + " to " + newRole);
     }
 
     private UserResponse toResponse(User user) {
@@ -97,6 +109,7 @@ public class UserService {
                 .emailVerified(user.isEmailVerified())
                 .employeeId(user.getEmployee() != null ? user.getEmployee().getId() : null)
                 .employeeName(user.getEmployee() != null ? user.getEmployee().getFullName() : null)
+                .displayName(user.getDisplayName())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

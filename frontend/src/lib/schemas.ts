@@ -50,3 +50,57 @@ export const departmentSchema = z.object({
   budget: z.coerce.number().min(0, 'Budget cannot be negative').optional(),
 })
 export type DepartmentFormValues = z.infer<typeof departmentSchema>
+
+export const registerSchema = z
+  .object({
+    fullName: z.string().min(1, 'Full name is required').max(120, 'Full name must be under 120 characters'),
+    email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
+    password: z
+      .string()
+      .min(8, 'Must be at least 8 characters')
+      .regex(/[a-z]/, 'Needs a lowercase letter')
+      .regex(/[A-Z]/, 'Needs an uppercase letter')
+      .regex(/[0-9]/, 'Needs a number')
+      .regex(/[@$!%*?&#^()_\-+=]/, 'Needs a symbol'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
+export type RegisterFormValues = z.infer<typeof registerSchema>
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, 'Must be at least 8 characters')
+      .regex(/[a-z]/, 'Needs a lowercase letter')
+      .regex(/[A-Z]/, 'Needs an uppercase letter')
+      .regex(/[0-9]/, 'Needs a number')
+      .regex(/[@$!%*?&#^()_\-+=]/, 'Needs a symbol'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z
+      .string()
+      .min(8, 'Must be at least 8 characters')
+      .regex(/[a-z]/, 'Needs a lowercase letter')
+      .regex(/[A-Z]/, 'Needs an uppercase letter')
+      .regex(/[0-9]/, 'Needs a number')
+      .regex(/[@$!%*?&#^()_\-+=]/, 'Needs a symbol'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>

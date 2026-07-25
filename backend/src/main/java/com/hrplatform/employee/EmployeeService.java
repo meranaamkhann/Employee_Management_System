@@ -3,6 +3,9 @@ package com.hrplatform.employee;
 import com.hrplatform.common.ApiException;
 import com.hrplatform.common.ErrorCode;
 import com.hrplatform.common.PageResponse;
+import com.hrplatform.audit.AuditAction;
+import com.hrplatform.audit.AuditEntityType;
+import com.hrplatform.audit.AuditService;
 import com.hrplatform.department.Department;
 import com.hrplatform.department.DepartmentRepository;
 import com.hrplatform.employee.dto.EmployeeRequest;
@@ -32,6 +35,7 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
     private final EmployeeMapper employeeMapper;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public PageResponse<EmployeeResponse> search(String term, String departmentId, EmploymentStatus status,
@@ -65,6 +69,8 @@ public class EmployeeService {
         employee.setEmployeeCode(generateEmployeeCode());
 
         Employee saved = employeeRepository.save(employee);
+        auditService.record(AuditEntityType.EMPLOYEE, saved.getId(), AuditAction.CREATE,
+                "Created employee " + saved.getFullName() + " (" + saved.getEmployeeCode() + ")");
         return employeeMapper.toResponse(saved);
     }
 
@@ -78,6 +84,8 @@ public class EmployeeService {
         applyRequest(employee, request, id);
 
         Employee saved = employeeRepository.save(employee);
+        auditService.record(AuditEntityType.EMPLOYEE, saved.getId(), AuditAction.UPDATE,
+                "Updated employee " + saved.getFullName() + " (" + saved.getEmployeeCode() + ")");
         return employeeMapper.toResponse(saved);
     }
 
@@ -93,6 +101,8 @@ public class EmployeeService {
         employee.setDeleted(true);
         employee.setDeletedAt(Instant.now());
         employeeRepository.save(employee);
+        auditService.record(AuditEntityType.EMPLOYEE, employee.getId(), AuditAction.DELETE,
+                "Deleted employee " + employee.getFullName() + " (" + employee.getEmployeeCode() + ")");
     }
 
     @Transactional
@@ -108,6 +118,9 @@ public class EmployeeService {
             e.setDeletedAt(now);
         });
         employeeRepository.saveAll(employees);
+        auditService.record(AuditEntityType.EMPLOYEE, null, AuditAction.DELETE,
+                "Bulk-deleted " + employees.size() + " employee(s): "
+                        + employees.stream().map(Employee::getFullName).limit(10).reduce((a, b) -> a + ", " + b).orElse(""));
     }
 
     @Transactional
@@ -120,6 +133,8 @@ public class EmployeeService {
         employee.setDeleted(false);
         employee.setDeletedAt(null);
         Employee saved = employeeRepository.save(employee);
+        auditService.record(AuditEntityType.EMPLOYEE, saved.getId(), AuditAction.RESTORE,
+                "Restored employee " + saved.getFullName() + " (" + saved.getEmployeeCode() + ")");
         return employeeMapper.toResponse(saved);
     }
 
