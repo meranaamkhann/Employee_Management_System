@@ -35,13 +35,18 @@ export default function LoginPage() {
       // otherwise a validation failure looks identical to a typo with no clue
       // which field caused it.
       const fieldErrors = getFieldErrors(err)
-      if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+      let matchedAny = false
+      if (fieldErrors) {
         Object.entries(fieldErrors).forEach(([field, message]) => {
           if (field === 'email' || field === 'password') {
             setError(field as keyof LoginFormValues, { message })
+            matchedAny = true
           }
         })
-      } else {
+      }
+      // Always fall back to a visible banner if nothing was matched onto a
+      // field — a validation error must never fail completely silently.
+      if (!matchedAny) {
         setServerError(getErrorMessage(err, 'Email or password is incorrect.'))
       }
     }

@@ -256,13 +256,16 @@ function TeamAccountsSection() {
       setIsModalOpen(false)
     } catch (err) {
       const fieldErrors = getFieldErrors(err)
-      if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+      let matchedAny = false
+      if (fieldErrors) {
         Object.entries(fieldErrors).forEach(([field, message]) => {
           if (field === 'email' || field === 'password' || field === 'role') {
             setError(field as keyof CreateUserValues, { message })
+            matchedAny = true
           }
         })
-      } else {
+      }
+      if (!matchedAny) {
         setServerError(getErrorMessage(err))
       }
     }

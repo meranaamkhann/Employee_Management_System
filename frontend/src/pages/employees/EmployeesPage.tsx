@@ -4,7 +4,6 @@ import { useBulkDeleteEmployees, useDeleteEmployee, useEmployees } from '@/hooks
 import { useDepartments } from '@/hooks/use-departments'
 import { useAuth } from '@/lib/auth-context'
 import { Card } from '@/components/ui/Card'
-import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'

@@ -31,17 +31,18 @@ export default function RegisterPage() {
       navigate(getDefaultRouteForRole(authUser.role))
     } catch (err) {
       const fieldErrors = getFieldErrors(err)
-      if (fieldErrors && Object.keys(fieldErrors).length > 0) {
-        // Backend field names are fullName/email/password — map directly
-        // onto the form so the person sees exactly what's wrong, e.g.
-        // "Password must be at least 8 characters and include upper,
-        // lower, a number, and a symbol" under the password field itself.
+      let matchedAny = false
+      if (fieldErrors) {
         Object.entries(fieldErrors).forEach(([field, message]) => {
           if (field === 'fullName' || field === 'email' || field === 'password') {
             setError(field as keyof RegisterFormValues, { message })
+            matchedAny = true
           }
         })
-      } else {
+      }
+      // Always fall back to a visible banner if nothing was matched onto a
+      // field — a validation error must never fail completely silently.
+      if (!matchedAny) {
         setServerError(getErrorMessage(err, 'Could not create your account.'))
       }
     }
