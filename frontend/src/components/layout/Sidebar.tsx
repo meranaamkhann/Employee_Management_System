@@ -20,7 +20,10 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-64 flex-col justify-between border-r border-paper-300/70 bg-white px-4 py-6 dark:border-ink-700/70 dark:bg-ink-900">
       <div>
-        <Link to="/" className="mb-8 flex items-center gap-2 px-2 transition-opacity hover:opacity-80">
+        {/* <Link to="/" className="mb-8 flex items-center gap-2 px-2 transition-opacity hover:opacity-80"> */}
+        <Link
+  to={user ? "/app/dashboard" : "/"}
+  className="mb-8 flex items-center gap-2 transition-opacity hover:opacity-80">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-900 dark:bg-brass-400">
             <span className="font-display text-sm font-semibold text-brass-400 dark:text-ink-950">R</span>
           </div>
