@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
     })
     const authUser = persistFromAuthResponse(response.data.data)
+    localStorage.setItem('hr_show_onboarding', '1')
     setUser(authUser)
     return authUser
   }

@@ -50,7 +50,7 @@ export default function EmployeesPage() {
     setIsModalOpen(true)
   }
 
-  function openEdit(employee: Employee) {
+  function openDetails(employee: Employee) {
     setModalEmployee(employee)
     setIsModalOpen(true)
   }
@@ -159,13 +159,18 @@ export default function EmployeesPage() {
               </thead>
               <tbody>
                 {data.content.map((employee) => (
-                  <tr key={employee.id} className="border-b border-paper-200/70 last:border-0 hover:bg-paper-100/60 dark:border-ink-700/70 dark:hover:bg-ink-800/60">
+                  <tr
+                    key={employee.id}
+                    onClick={() => openDetails(employee)}
+                    className="cursor-pointer border-b border-paper-200/70 last:border-0 hover:bg-paper-100/60 dark:border-ink-700/70 dark:hover:bg-ink-800/60"
+                  >
                     {canEdit && (
                       <td className="px-6 py-3.5">
                         <input
                           type="checkbox"
                           checked={selectedIds.includes(employee.id)}
                           onChange={() => toggleSelected(employee.id)}
+                          onClick={(e) => e.stopPropagation()}
                           className="h-4 w-4 rounded border-paper-300"
                         />
                       </td>
@@ -191,14 +196,18 @@ export default function EmployeesPage() {
                       <td className="px-6 py-3.5 text-right">
                         <div className="flex justify-end gap-1">
                           <button
-                            onClick={() => openEdit(employee)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openDetails(employee)
+                            }}
                             className="rounded-lg p-2 text-ink-600 hover:bg-paper-200 hover:text-ink-900 dark:text-paper-300/60 dark:hover:bg-ink-800 dark:hover:text-paper-50"
                             aria-label={`Edit ${employee.fullName}`}
                           >
                             <Pencil size={15} />
                           </button>
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation()
                               if (confirm(`Delete ${employee.fullName}?`)) deleteMutation.mutate(employee.id)
                             }}
                             className="rounded-lg p-2 text-ink-600 hover:bg-signal-rose/10 hover:text-signal-rose"
@@ -223,9 +232,12 @@ export default function EmployeesPage() {
         )}
       </Card>
 
-      {canEdit && (
-        <EmployeeFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} employee={modalEmployee} />
-      )}
+      <EmployeeFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        employee={modalEmployee}
+        readOnly={!canEdit}
+      />
     </div>
   )
 }

@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Users, UserCheck, CalendarClock, TrendingUp } from 'lucide-react'
+import { Users, UserCheck, CalendarClock, TrendingUp, Cake, UserPlus, Building2, History } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useDashboardStats } from '@/hooks/use-dashboard'
+import { useEmployees } from '@/hooks/use-employees'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { formatCurrency, formatDate } from '@/lib/format'
@@ -13,8 +15,31 @@ const statCards = [
   { key: 'newHiresThisMonth', label: 'New hires this month', icon: TrendingUp, format: (v: number) => v.toString() },
 ] as const
 
+const quickActions = [
+  { to: '/app/employees', label: 'Add employee', icon: UserPlus },
+  { to: '/app/departments', label: 'Manage departments', icon: Building2 },
+  { to: '/app/activity', label: 'View activity', icon: History },
+] as const
+
+function daysUntilNextBirthday(dateOfBirth: string): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const dob = new Date(dateOfBirth)
+  const next = new Date(today.getFullYear(), dob.getMonth(), dob.getDate())
+  if (next < today) next.setFullYear(next.getFullYear() + 1)
+  return Math.round((next.getTime() - today.getTime()) / 86_400_000)
+}
+
 export default function DashboardPage() {
   const { data: stats, isLoading } = useDashboardStats()
+  const { data: employeesPage } = useEmployees({ size: 100 })
+
+  const upcomingBirthdays = (employeesPage?.content ?? [])
+    .filter((e) => e.dateOfBirth)
+    .map((e) => ({ ...e, daysUntil: daysUntilNextBirthday(e.dateOfBirth!) }))
+    .filter((e) => e.daysUntil <= 30)
+    .sort((a, b) => a.daysUntil - b.daysUntil)
+    .slice(0, 5)
 
   return (
     <div className="flex flex-col gap-6">
@@ -105,6 +130,53 @@ export default function DashboardPage() {
             ) : (
               <p className="py-8 text-center text-sm text-ink-600 dark:text-paper-300/50">No hires recorded yet.</p>
             )}
+          </CardBody>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <h2 className="font-display text-lg text-ink-900 dark:text-paper-50">Upcoming birthdays</h2>
+          </CardHeader>
+          <CardBody className="pt-4">
+            {upcomingBirthdays.length > 0 ? (
+              <ul className="flex flex-col divide-y divide-paper-200 dark:divide-ink-700">
+                {upcomingBirthdays.map((e) => (
+                  <li key={e.id} className="flex items-center justify-between py-3">
+                    <div className="flex items-center gap-2.5">
+                      <Cake size={15} className="text-brass-500" />
+                      <p className="text-sm font-medium text-ink-900 dark:text-paper-50">{e.fullName}</p>
+                    </div>
+                    <span className="text-xs text-ink-600 dark:text-paper-300/50">
+                      {e.daysUntil === 0 ? 'Today' : e.daysUntil === 1 ? 'Tomorrow' : `In ${e.daysUntil} days`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="py-8 text-center text-sm text-ink-600 dark:text-paper-300/50">
+                Nothing in the next 30 days.
+              </p>
+            )}
+          </CardBody>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <h2 className="font-display text-lg text-ink-900 dark:text-paper-50">Quick actions</h2>
+          </CardHeader>
+          <CardBody className="flex flex-col gap-2 pt-4">
+            {quickActions.map((action) => (
+              <Link
+                key={action.to}
+                to={action.to}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-800 transition-colors hover:bg-paper-200 dark:text-paper-200 dark:hover:bg-ink-800"
+              >
+                <action.icon size={16} className="text-ink-600 dark:text-paper-300/60" />
+                {action.label}
+              </Link>
+            ))}
           </CardBody>
         </Card>
       </div>

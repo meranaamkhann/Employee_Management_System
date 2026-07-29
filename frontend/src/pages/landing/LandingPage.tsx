@@ -9,6 +9,8 @@ import { LandingNavbar } from '@/components/landing/LandingNavbar'
 import { RosterStrip } from '@/components/landing/RosterStrip'
 import { DashboardPreviewCard } from '@/components/landing/DashboardPreviewCard'
 import { useCountUp } from '@/hooks/use-count-up'
+import { useAuth } from '@/lib/auth-context'
+import { getDefaultRouteForRole } from '@/lib/routing'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -74,6 +76,8 @@ export default function LandingPage() {
 }
 
 function Hero() {
+  const { user } = useAuth()
+  const ctaHref = user ? getDefaultRouteForRole(user.role) : '/login'
   return (
     <section className="relative overflow-hidden pb-28 pt-40">
       <div className="noise absolute inset-0" />
@@ -121,10 +125,10 @@ function Hero() {
             className="mt-8 flex flex-wrap items-center gap-4"
           >
             <Link
-              to="/login"
+              to={ctaHref}
               className="group inline-flex items-center gap-2 rounded-xl bg-brass-400 px-5 py-3 text-sm font-medium text-ink-950 transition-transform hover:scale-[1.03] active:scale-[0.98]"
             >
-              Start free trial
+              {user ? 'Open workspace' : 'Start free trial'}
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <a href="#preview" className="text-sm font-medium text-paper-300/80 hover:text-paper-50">
@@ -316,6 +320,8 @@ function Testimonials() {
 }
 
 function Pricing() {
+  const { user } = useAuth()
+  const ctaHref = user ? getDefaultRouteForRole(user.role) : '/login'
   return (
     <section id="pricing" className="mx-auto max-w-6xl px-6 py-28">
       <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} className="mx-auto max-w-xl text-center">
@@ -352,7 +358,7 @@ function Pricing() {
               ))}
             </ul>
             <Link
-              to="/login"
+              to={ctaHref}
               className={`mt-7 block rounded-lg px-4 py-2.5 text-center text-sm font-medium transition-transform hover:scale-[1.02] ${
                 plan.highlighted ? 'bg-brass-400 text-ink-950' : 'bg-white/10 text-paper-50'
               }`}

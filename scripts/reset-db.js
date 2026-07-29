@@ -1,4 +1,23 @@
-
+#!/usr/bin/env node
+/**
+ * Wipes the local Postgres volume and re-initializes it from
+ * docker-compose.yml. Node instead of bash so it runs the same way on
+ * Windows, macOS, and Linux — no WSL/Git Bash required.
+ *
+ * Why this exists: Postgres only applies POSTGRES_USER / POSTGRES_PASSWORD
+ * / POSTGRES_DB the *first* time it initializes an empty data directory. If
+ * the "postgres_data" volume was ever created under different credentials,
+ * the container keeps using those old credentials forever — editing
+ * docker-compose.yml or application.yml afterward has no effect. That
+ * mismatch is what produces:
+ *
+ *   FATAL: password authentication failed for user "hr_platform"
+ *
+ * This script is destructive to local dev data only (not any real
+ * deployment).
+ *
+ * Usage: node scripts/reset-db.js
+ */
 const { execSync } = require('node:child_process');
 
 function run(cmd) {

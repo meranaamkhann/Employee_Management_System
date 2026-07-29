@@ -1,3 +1,13 @@
+#!/usr/bin/env node
+/**
+ * Checks that the versions of Java, Node, and Docker on this machine match
+ * what the project expects, and prints exactly what's wrong instead of
+ * letting a version mismatch surface later as a confusing build/runtime
+ * error. Pure Node with no dependencies, so it runs identically on
+ * Windows, macOS, and Linux — unlike a bash script.
+ *
+ * Usage: node scripts/check-env.js
+ */
 const { execSync } = require('node:child_process');
 
 const REQUIRED = {
@@ -47,6 +57,8 @@ if (javaRaw) {
 } else {
   check('Java', false, 'not found on PATH — install Java 21 (Temurin recommended)');
 }
+
+// Maven (optional — mvn wrapper isn't bundled, so a system Maven is required)
 const mvnRaw = run('mvn -version');
 check('Maven', mvnRaw !== null, mvnRaw ? mvnRaw.split('\n')[0] : 'not found on PATH — install Maven 3.9+');
 
@@ -54,6 +66,7 @@ check('Maven', mvnRaw !== null, mvnRaw ? mvnRaw.split('\n')[0] : 'not found on P
 const dockerRaw = run('docker --version');
 check('Docker', dockerRaw !== null, dockerRaw || 'not found on PATH — install Docker Desktop');
 
+// Docker Compose (v2 plugin syntax)
 const composeRaw = run('docker compose version');
 check('Docker Compose', composeRaw !== null, composeRaw || 'not found — Docker Desktop should include this');
 

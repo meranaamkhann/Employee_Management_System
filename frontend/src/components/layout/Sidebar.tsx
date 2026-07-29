@@ -1,8 +1,8 @@
 import { NavLink, Link } from 'react-router-dom'
-import clsx from 'clsx'
 import { LayoutDashboard, Users, Building2, LogOut, Sun, Moon, User, Settings, History } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { useTheme } from '@/lib/theme-context'
+import { getDefaultRouteForRole } from '@/lib/routing'
 
 const navItems = [
   { to: '/app/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'HR', 'MANAGER'] },
@@ -20,10 +20,10 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-64 flex-col justify-between border-r border-paper-300/70 bg-white px-4 py-6 dark:border-ink-700/70 dark:bg-ink-900">
       <div>
-        {/* <Link to="/" className="mb-8 flex items-center gap-2 px-2 transition-opacity hover:opacity-80"> */}
         <Link
-  to={user ? "/app/dashboard" : "/"}
-  className="mb-8 flex items-center gap-2 transition-opacity hover:opacity-80">
+          to={user ? getDefaultRouteForRole(user.role) : '/'}
+          className="mb-8 flex items-center gap-2 px-2 transition-opacity hover:opacity-80"
+        >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-900 dark:bg-brass-400">
             <span className="font-display text-sm font-semibold text-brass-400 dark:text-ink-950">R</span>
           </div>

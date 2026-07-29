@@ -35,7 +35,7 @@ export default function DepartmentsPage() {
     setIsModalOpen(true)
   }
 
-  function openEdit(dept: Department) {
+  function openDetails(dept: Department) {
     setEditingDept(dept)
     setIsModalOpen(true)
   }
@@ -74,7 +74,11 @@ export default function DepartmentsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {departments.map((dept) => (
-            <Card key={dept.id}>
+            <Card
+              key={dept.id}
+              onClick={() => openDetails(dept)}
+              className="cursor-pointer transition-colors hover:border-brass-400/40"
+            >
               <CardBody className="pt-6">
                 <div className="flex items-start justify-between">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-paper-200 text-ink-800 dark:bg-ink-800 dark:text-paper-100">
@@ -83,14 +87,20 @@ export default function DepartmentsPage() {
                   {canEdit && (
                     <div className="flex gap-1">
                       <button
-                        onClick={() => openEdit(dept)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openDetails(dept)
+                        }}
                         className="rounded-lg p-1.5 text-ink-600 hover:bg-paper-200 hover:text-ink-900 dark:text-paper-300/60 dark:hover:bg-ink-800 dark:hover:text-paper-50"
                         aria-label={`Edit ${dept.name}`}
                       >
                         <Pencil size={14} />
                       </button>
                       <button
-                        onClick={() => handleDelete(dept)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(dept)
+                        }}
                         className="rounded-lg p-1.5 text-ink-600 hover:bg-signal-rose/10 hover:text-signal-rose"
                         aria-label={`Delete ${dept.name}`}
                       >
@@ -114,9 +124,12 @@ export default function DepartmentsPage() {
         </div>
       )}
 
-      {canEdit && (
-        <DepartmentFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} department={editingDept} />
-      )}
+      <DepartmentFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        department={editingDept}
+        readOnly={!canEdit}
+      />
     </div>
   )
 }
@@ -125,10 +138,12 @@ function DepartmentFormModal({
   isOpen,
   onClose,
   department,
+  readOnly = false,
 }: {
   isOpen: boolean
   onClose: () => void
   department?: Department
+  readOnly?: boolean
 }) {
   const isEdit = !!department
   const { data: employeeOptions } = useEmployees({ size: 100 })
@@ -175,35 +190,45 @@ function DepartmentFormModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit department' : 'Add department'}>
+    <Modal isOpen={isOpen} onClose={onClose} title={readOnly ? 'Department details' : isEdit ? 'Edit department' : 'Add department'}>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         {serverError && (
           <div className="rounded-lg bg-signal-rose/10 px-3.5 py-2.5 text-sm text-signal-rose">{serverError}</div>
         )}
-        <Input label="Department name" error={errors.name?.message} {...register('name')} />
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-ink-800 dark:text-paper-200">Description</label>
-          <textarea
-            className="min-h-20 w-full rounded-lg border border-paper-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 focus:border-brass-500 focus:outline-none focus:ring-2 focus:ring-brass-400/50 dark:border-ink-600 dark:bg-ink-800 dark:text-paper-50"
-            {...register('description')}
-          />
-        </div>
-        <Input label="Budget" type="number" step="0.01" error={errors.budget?.message} {...register('budget')} />
-        <Select label="Department head" {...register('headEmployeeId')}>
-          <option value="">None</option>
-          {employeeOptions?.content.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.fullName}
-            </option>
-          ))}
-        </Select>
+        <fieldset disabled={readOnly} className="contents">
+          <Input label="Department name" error={errors.name?.message} {...register('name')} />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-ink-800 dark:text-paper-200">Description</label>
+            <textarea
+              className="min-h-20 w-full rounded-lg border border-paper-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 focus:border-brass-500 focus:outline-none focus:ring-2 focus:ring-brass-400/50 dark:border-ink-600 dark:bg-ink-800 dark:text-paper-50"
+              {...register('description')}
+            />
+          </div>
+          <Input label="Budget" type="number" step="0.01" error={errors.budget?.message} {...register('budget')} />
+          <Select label="Department head" {...register('headEmployeeId')}>
+            <option value="">None</option>
+            {employeeOptions?.content.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.fullName}
+              </option>
+            ))}
+          </Select>
+        </fieldset>
         <div className="mt-2 flex justify-end gap-3">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit" isLoading={isSubmitting}>
-            {isEdit ? 'Save changes' : 'Add department'}
-          </Button>
+          {readOnly ? (
+            <Button type="button" variant="secondary" onClick={onClose}>
+              Close
+            </Button>
+          ) : (
+            <>
+              <Button type="button" variant="secondary" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" isLoading={isSubmitting}>
+                {isEdit ? 'Save changes' : 'Add department'}
+              </Button>
+            </>
+          )}
         </div>
       </form>
     </Modal>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { formatDistanceToNow } from 'date-fns'
 import { History, UserCircle, Building2, KeyRound } from 'lucide-react'
 import { useAuditLogs } from '@/hooks/use-audit-logs'
 import { Card } from '@/components/ui/Card'
@@ -60,31 +61,38 @@ export default function ActivityPage() {
         ) : !data || data.content.length === 0 ? (
           <EmptyState icon={<History size={40} />} title="No activity yet" description="Changes will show up here as they happen." />
         ) : (
-          <div className="flex flex-col divide-y divide-paper-200 dark:divide-ink-700">
+          <div className="px-6 py-2">
             {data.content.map((entry, i) => {
               const Icon = entityIcons[entry.entityType]
+              const isLast = i === data.content.length - 1
               return (
                 <motion.div
                   key={entry.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2, delay: Math.min(i * 0.02, 0.3) }}
-                  className="flex items-start gap-3 px-6 py-4"
+                  initial={{ opacity: 0, x: -4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.3) }}
+                  className="relative flex gap-4 pb-6 last:pb-0"
                 >
-                  <div className="mt-0.5 rounded-lg bg-paper-200 p-1.5 text-ink-700 dark:bg-ink-800 dark:text-paper-200">
-                    <Icon size={15} />
+                  {!isLast && (
+                    <span className="absolute left-[15px] top-8 h-full w-px bg-paper-200 dark:bg-ink-700" />
+                  )}
+                  <div className="relative z-10 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-paper-200 text-ink-700 ring-4 ring-white dark:bg-ink-800 dark:text-paper-200 dark:ring-ink-900">
+                    <Icon size={14} />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1 pt-0.5">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${actionStyles[entry.action]}`}>
                         {entry.action.replace('_', ' ')}
                       </span>
                       <p className="text-sm text-ink-900 dark:text-paper-50">{entry.summary ?? entry.entityType}</p>
                     </div>
-                    <p className="mt-1 text-xs text-ink-600 dark:text-paper-300/50">
+                    <p
+                      className="mt-1 text-xs text-ink-600 dark:text-paper-300/50"
+                      title={new Date(entry.createdAt).toLocaleString()}
+                    >
                       {entry.performedByEmail}
                       {entry.performedByRole ? ` · ${entry.performedByRole}` : ''} ·{' '}
-                      {new Date(entry.createdAt).toLocaleString()}
+                      {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
                     </p>
                   </div>
                 </motion.div>
