@@ -1,4 +1,5 @@
 import { NavLink, Link } from 'react-router-dom'
+import clsx from "clsx";
 import { LayoutDashboard, Users, Building2, LogOut, Sun, Moon, User, Settings, History } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { useTheme } from '@/lib/theme-context'

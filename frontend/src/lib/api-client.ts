@@ -3,6 +3,7 @@ import type { ApiResponse, AuthResponse } from '@/types/api'
 
 const ACCESS_TOKEN_KEY = 'hr_access_token'
 const REFRESH_TOKEN_KEY = 'hr_refresh_token'
+const USER_KEY = 'hr_user'
 
 export const tokenStore = {
   getAccessToken: () => localStorage.getItem(ACCESS_TOKEN_KEY),
@@ -14,6 +15,7 @@ export const tokenStore = {
   clear: () => {
     localStorage.removeItem(ACCESS_TOKEN_KEY)
     localStorage.removeItem(REFRESH_TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
   },
 }
 

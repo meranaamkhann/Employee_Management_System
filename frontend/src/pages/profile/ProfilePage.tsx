@@ -18,7 +18,6 @@ export default function ProfilePage() {
   const { data: employee, isLoading, isError, error } = useMyProfile()
 
   const notLinked = isError && error instanceof AxiosError && error.response?.status === 404
-  const isSystemRole = user?.role === 'ADMIN' || user?.role === 'IT_ADMIN'
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -33,8 +32,8 @@ export default function ProfilePage() {
             <Skeleton className="h-24 w-full" />
           </CardBody>
         </Card>
-      ) : notLinked && isSystemRole ? (
-        <SystemAccountCard role={user!.role} email={user!.email} />
+      ) : notLinked && user && (user.role === 'ADMIN' || user.role === 'IT_ADMIN') ? (
+        <SystemAccountCard role={user.role} email={user.email} />
       ) : notLinked ? (
         <OnboardingCard email={user?.email ?? ''} />
       ) : employee ? (

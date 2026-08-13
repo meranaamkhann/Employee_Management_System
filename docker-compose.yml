@@ -9,12 +9,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      # Host port 5433, not 5432 — avoids clashing with a native Postgres
-      # install or another project already using 5432 on your machine.
-      # Backend/frontend containers still talk to this over Docker's
-      # internal network as "postgres:5432" (see DB_URL below), so this
-      # only affects connecting from a host tool like DBeaver/pgAdmin
-      # (use localhost:5433 for that).
       - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U hr_platform"]
