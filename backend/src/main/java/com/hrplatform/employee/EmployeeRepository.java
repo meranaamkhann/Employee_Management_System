@@ -31,6 +31,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String>, Jpa
 
     List<Employee> findTop5ByDeletedFalseAndJoiningDateIsNotNullOrderByJoiningDateDesc();
 
+    List<Employee> findByStatusAndDeletedFalse(EmploymentStatus status);
+
     /**
      * One query for every department's headcount, instead of one query per
      * department. Callers that need counts for a whole list of departments

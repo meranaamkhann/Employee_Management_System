@@ -17,4 +17,11 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Stri
               and r.startDate <= :endDate and r.endDate >= :startDate
             """)
     List<LeaveRequest> findOverlapping(String employeeId, LocalDate startDate, LocalDate endDate);
+
+    @Query("""
+            select coalesce(sum(r.numberOfDays), 0) from LeaveRequest r
+            where r.employee.id = :employeeId and r.leaveType = 'UNPAID' and r.status = 'APPROVED'
+              and r.startDate <= :monthEnd and r.endDate >= :monthStart
+            """)
+    int sumApprovedUnpaidDays(String employeeId, java.time.LocalDate monthStart, java.time.LocalDate monthEnd);
 }

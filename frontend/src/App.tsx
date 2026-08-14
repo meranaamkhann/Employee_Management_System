@@ -15,6 +15,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
 import AttendancePage from '@/pages/attendance/AttendancePage'
 import LeavePage from '@/pages/leave/LeavePage'
+import PayrollPage from '@/pages/payroll/PayrollPage'
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
       <Route path="*" element={<NotFoundPage />} />
        <Route path="attendance" element={<AttendancePage />} />
        <Route path="leave" element={<LeavePage />} />
+       <Route path="payroll" element={<PayrollPage />} />
     </Routes>
   )
 }

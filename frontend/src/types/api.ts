@@ -214,3 +214,25 @@ export interface Holiday {
   date: string
   name: string
 }
+
+export type PayslipStatus = 'DRAFT' | 'FINALIZED' | 'PAID'
+
+export interface Payslip {
+  id: string
+  employee: EmployeeSummary
+  payMonth: string
+  basicSalary: number
+  hra: number
+  conveyanceAllowance: number
+  specialAllowance: number
+  grossEarnings: number
+  providentFund: number
+  professionalTax: number
+  unpaidLeaveDeduction: number
+  bonus: number
+  netSalary: number
+  status: PayslipStatus
+  generatedAt: string
+  paidAt?: string
+  notes?: string
+}

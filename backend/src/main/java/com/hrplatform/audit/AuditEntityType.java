@@ -5,5 +5,7 @@ public enum AuditEntityType {
     DEPARTMENT,
     USER_ACCOUNT,
     ATTENDANCE,
-    HOLIDAY
+    LEAVE_REQUEST,
+    HOLIDAY,
+    PAYROLL
 }
