@@ -4,3 +4,9 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
+
+app:
+  cloudinary:
+    cloud-name: test-cloud
+    api-key: test-api-key
+    api-secret: test-api-secret
