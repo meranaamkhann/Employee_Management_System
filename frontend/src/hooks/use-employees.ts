@@ -88,3 +88,25 @@ export function useBulkDeleteEmployees() {
     },
   })
 }
+
+export async function exportEmployeesCsv(filters: Omit<EmployeeFilters, 'page' | 'size' | 'sort'>) {
+  const response = await apiClient.get('/employees/export', {
+    params: filters,
+    responseType: 'blob',
+  })
+
+  const blob = new Blob([response.data], { type: 'text/csv' })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+
+  // Prefer the server-provided filename (from Content-Disposition) if present
+  const disposition = response.headers['content-disposition'] as string | undefined
+  const match = disposition?.match(/filename="(.+)"/)
+  link.download = match?.[1] ?? `employees-export-${new Date().toISOString().slice(0, 10)}.csv`
+
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}

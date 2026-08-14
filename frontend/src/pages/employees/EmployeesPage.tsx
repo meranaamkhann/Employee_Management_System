@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
-import { useBulkDeleteEmployees, useDeleteEmployee, useEmployees } from '@/hooks/use-employees'
+import { exportEmployeesCsv, useBulkDeleteEmployees, useDeleteEmployee, useEmployees } from '@/hooks/use-employees'
 import { useDepartments } from '@/hooks/use-departments'
 import { useAuth } from '@/lib/auth-context'
 import { Card } from '@/components/ui/Card'
@@ -12,7 +12,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { StatusBadge } from '@/components/ui/Badge'
 import { EmployeeFormModal } from '@/components/employees/EmployeeFormModal'
 import { formatCurrency, initials } from '@/lib/format'
-import { Search, Plus, Trash2, Pencil, Users } from 'lucide-react'
+import { Search, Plus, Trash2, Pencil, Users, Download } from 'lucide-react'
 import type { Employee } from '@/types/api'
 
 export default function EmployeesPage() {
@@ -39,6 +39,21 @@ export default function EmployeesPage() {
     }),
     [debouncedSearch, departmentId, status, page],
   )
+
+  const [isExporting, setIsExporting] = useState(false)
+
+  async function handleExport() {
+    setIsExporting(true)
+    try {
+      await exportEmployeesCsv({
+        q: debouncedSearch || undefined,
+        departmentId: departmentId || undefined,
+        status: status || undefined,
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   const { data, isLoading, isPlaceholderData } = useEmployees(filters)
   const { data: departments } = useDepartments()
@@ -80,6 +95,16 @@ export default function EmployeesPage() {
           </Button>
         )}
       </div>
+      <div className="flex items-center gap-2">
+          <Button variant="secondary" onClick={handleExport} disabled={isExporting}>
+            <Download size={16} /> {isExporting ? 'Exporting…' : 'Export CSV'}
+          </Button>
+          {canEdit && (
+            <Button onClick={openCreate}>
+              <Plus size={16} /> Add employee
+            </Button>
+          )}
+        </div>
 
       <Card>
         <div className="flex flex-col gap-3 border-b border-paper-200 p-4 dark:border-ink-700 sm:flex-row sm:items-center">

@@ -11,6 +11,8 @@ import com.hrplatform.department.DepartmentRepository;
 import com.hrplatform.employee.dto.EmployeeRequest;
 import com.hrplatform.employee.dto.EmployeeResponse;
 import com.hrplatform.employee.mapper.EmployeeMapper;
+import com.hrplatform.storage.StorageService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,7 @@ public class EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final EmployeeMapper employeeMapper;
     private final AuditService auditService;
+    private final com.hrplatform.storage.StorageService storageService;
 
     @Transactional(readOnly = true)
     public PageResponse<EmployeeResponse> search(String term, String departmentId, EmploymentStatus status,
@@ -50,6 +53,28 @@ public class EmployeeService {
         Page<Employee> page = employeeRepository.findAll(spec, pageable);
         List<EmployeeResponse> mapped = page.getContent().stream().map(employeeMapper::toResponse).toList();
         return PageResponse.of(page, mapped);
+    }
+
+    /**
+     * Same filters/RBAC scoping as search(), but unpaginated — export needs
+     * every matching row, not one page of them. Capped at 5000 rows so a
+     * runaway export can't exhaust memory on the free-tier instance.
+     */
+    @Transactional(readOnly = true)
+    public List<Employee> searchForExport(String term, String departmentId, EmploymentStatus status,
+                                           Gender gender, String managerId) {
+        Specification<Employee> spec = Specification
+                .where(EmployeeSpecifications.notDeleted())
+                .and(EmployeeSpecifications.search(term))
+                .and(EmployeeSpecifications.departmentId(departmentId))
+                .and(EmployeeSpecifications.status(status))
+                .and(EmployeeSpecifications.gender(gender))
+                .and(EmployeeSpecifications.managerId(managerId));
+
+        return employeeRepository.findAll(spec, org.springframework.data.domain.Sort.by("fullName").ascending())
+                .stream()
+                .limit(5000)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -134,6 +159,42 @@ public class EmployeeService {
         Employee saved = employeeRepository.save(employee);
         auditService.record(AuditEntityType.EMPLOYEE, saved.getId(), AuditAction.RESTORE,
                 "Restored employee " + saved.getFullName() + " (" + saved.getEmployeeCode() + ")");
+        return employeeMapper.toResponse(saved);
+    }
+
+    @Transactional
+    public EmployeeResponse uploadPhoto(String id, org.springframework.web.multipart.MultipartFile file) {
+        Employee employee = findActiveOrThrow(id);
+
+        String oldPublicId = employee.getPhotoPublicId();
+
+        StorageService.UploadResult result = storageService.upload(file, "hr-platform/employees");
+        employee.setPhotoUrl(result.url());
+        employee.setPhotoPublicId(result.publicId());
+        Employee saved = employeeRepository.save(employee);
+
+        // Clean up the old image only after the new one is safely saved,
+        // so a failed save never leaves the employee with no photo at all.
+        if (oldPublicId != null) {
+            storageService.delete(oldPublicId);
+        }
+
+        auditService.record(AuditEntityType.EMPLOYEE, saved.getId(), AuditAction.UPDATE,
+                "Updated photo for " + saved.getFullName() + " (" + saved.getEmployeeCode() + ")");
+        return employeeMapper.toResponse(saved);
+    }
+
+    @Transactional
+    public EmployeeResponse removePhoto(String id) {
+        Employee employee = findActiveOrThrow(id);
+        if (employee.getPhotoPublicId() != null) {
+            storageService.delete(employee.getPhotoPublicId());
+        }
+        employee.setPhotoUrl(null);
+        employee.setPhotoPublicId(null);
+        Employee saved = employeeRepository.save(employee);
+        auditService.record(AuditEntityType.EMPLOYEE, saved.getId(), AuditAction.UPDATE,
+                "Removed photo for " + saved.getFullName() + " (" + saved.getEmployeeCode() + ")");
         return employeeMapper.toResponse(saved);
     }
 

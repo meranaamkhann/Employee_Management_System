@@ -1,0 +1,1 @@
+ALTER TABLE employee ADD COLUMN photo_public_id VARCHAR(255);

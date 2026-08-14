@@ -16,6 +16,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.hrplatform.common.CsvUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -61,6 +68,60 @@ public class EmployeeController {
             throw ApiException.notFound("No employee profile is linked to this account.");
         }
         return ResponseEntity.ok(ApiResponse.ok(employeeService.getById(employeeId)));
+    }
+
+    @GetMapping("/export")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
+    public ResponseEntity<StreamingResponseBody> exportCsv(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String departmentId,
+            @RequestParam(required = false) EmploymentStatus status,
+            @RequestParam(required = false) Gender gender,
+            @RequestParam(required = false) String managerId) {
+
+        UserPrincipal principal = SecurityUtils.currentUser();
+        String effectiveManagerId = managerId;
+        if ("MANAGER".equals(principal.getRole())) {
+            effectiveManagerId = principal.getEmployeeId();
+        }
+
+        List<com.hrplatform.employee.Employee> rows =
+                employeeService.searchForExport(q, departmentId, status, gender, effectiveManagerId);
+
+        StreamingResponseBody body = outputStream -> {
+            OutputStream out = outputStream;
+            out.write(CsvUtils.row(
+                    "Employee Code", "Full Name", "Email", "Phone", "Gender", "Date of Birth",
+                    "Department", "Designation", "Joining Date", "Salary", "Status",
+                    "Manager", "City", "Country"
+            ).getBytes(StandardCharsets.UTF_8));
+
+            for (com.hrplatform.employee.Employee e : rows) {
+                out.write(CsvUtils.row(
+                        e.getEmployeeCode(),
+                        e.getFullName(),
+                        e.getEmail(),
+                        e.getPhone(),
+                        e.getGender(),
+                        e.getDateOfBirth(),
+                        e.getDepartment() != null ? e.getDepartment().getName() : "",
+                        e.getDesignation(),
+                        e.getJoiningDate(),
+                        e.getSalary(),
+                        e.getStatus(),
+                        e.getManager() != null ? e.getManager().getFullName() : "",
+                        e.getCity(),
+                        e.getCountry()
+                ).getBytes(StandardCharsets.UTF_8));
+            }
+            out.flush();
+        };
+
+        String filename = "employees-export-" + java.time.LocalDate.now() + ".csv";
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(body);
     }
 
     @GetMapping("/{id}")
