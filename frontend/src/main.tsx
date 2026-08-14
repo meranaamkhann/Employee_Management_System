@@ -20,16 +20,16 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <ThemeProvider>
-        <BrowserRouter>
+    <BrowserRouter>
+      <ErrorBoundary>
+        <ThemeProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <App />
             </AuthProvider>
           </QueryClientProvider>
-        </BrowserRouter>
-      </ThemeProvider>
-    </ErrorBoundary>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
   </React.StrictMode>,
 )

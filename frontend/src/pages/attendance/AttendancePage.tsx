@@ -103,7 +103,7 @@ export default function AttendancePage() {
         {isLoading ? (
           <TableSkeleton />
         ) : !data?.content.length ? (
-          <EmptyState icon={CalendarCheck} title="No attendance records yet" description="Clock in to start your history." />
+          <EmptyState icon={<CalendarCheck size={40} />} title="No attendance records yet" description="Clock in to start your history." />
         ) : (
           <table className="w-full text-sm">
             <thead>

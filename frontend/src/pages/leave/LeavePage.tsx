@@ -106,7 +106,7 @@ function MyLeaveTab() {
           <h2 className="text-sm font-medium text-ink-900 dark:text-paper-50">Your requests</h2>
         </div>
         {!requests?.content.length ? (
-          <EmptyState icon={CalendarDays} title="No leave requests yet" description="Apply above to get started." />
+          <EmptyState icon={<CalendarDays size={40} />} title="No leave requests yet" description="Apply above to get started." />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -150,7 +150,7 @@ function ApprovalsTab() {
         <h2 className="text-sm font-medium text-ink-900 dark:text-paper-50">Pending approvals</h2>
       </div>
       {!data?.content.length ? (
-        <EmptyState icon={CalendarDays} title="Nothing pending" description="You're all caught up." />
+        <EmptyState icon={<CalendarDays size={40} />} title="Nothing pending" description="You're all caught up." />
       ) : (
         <table className="w-full text-sm">
           <thead>

@@ -28,7 +28,7 @@ function MyPayslipsView() {
       </div>
       <Card>
         {!data?.content.length ? (
-          <EmptyState icon={Wallet} title="No payslips yet" description="Payslips appear here once HR generates them." />
+          <EmptyState icon={<Wallet size={40} />} title="No payslips yet" description="Payslips appear here once HR generates them." />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -96,7 +96,7 @@ function PayrollAdminView() {
 
       <Card>
         {!data?.content.length ? (
-          <EmptyState icon={Wallet} title="No payslips for this month" description="Click 'Generate for month' to create them." />
+          <EmptyState icon={<Wallet size={40} />} title="No payslips for this month" description="Click 'Generate for month' to create them." />
         ) : (
           <table className="w-full text-sm">
             <thead>

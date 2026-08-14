@@ -5,6 +5,17 @@ spring:
   flyway:
     clean-disabled: false
 
+app:
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME}
+    api-key: ${CLOUDINARY_API_KEY}
+    api-secret: ${CLOUDINARY_API_SECRET}
+
+  mail:
+    resend-api-key: ${RESEND_API_KEY:}
+    from-address: ${MAIL_FROM_ADDRESS:onboarding@resend.dev}
+    from-name: ${MAIL_FROM_NAME:Rosterly}
+
 logging:
   level:
     com.hrplatform: DEBUG

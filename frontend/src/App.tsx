@@ -28,23 +28,29 @@ export default function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/app" element={<AppLayout />}>
+
           <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'HR', 'MANAGER']} />}>
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="employees" element={<EmployeesPage />} />
           </Route>
+
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
+
           <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'IT_ADMIN']} />}>
             <Route path="activity" element={<ActivityPage />} />
           </Route>
+
+          {/* Attendance / Leave / Payroll */}
+          <Route path="attendance" element={<AttendancePage />} />
+          <Route path="leave" element={<LeavePage />} />
+          <Route path="payroll" element={<PayrollPage />} />
+
         </Route>
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
-       <Route path="attendance" element={<AttendancePage />} />
-       <Route path="leave" element={<LeavePage />} />
-       <Route path="payroll" element={<PayrollPage />} />
     </Routes>
   )
 }
