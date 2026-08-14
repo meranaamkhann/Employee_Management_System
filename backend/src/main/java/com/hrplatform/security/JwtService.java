@@ -11,6 +11,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -33,7 +34,21 @@ public class JwtService {
     }
 
     public String generateRefreshToken(String subjectEmail, String userId) {
-        return buildToken(subjectEmail, Map.of("uid", userId, "type", "refresh"), refreshTokenExpiryMs);
+        return buildToken(subjectEmail,
+                Map.of("uid", userId, "type", "refresh", "jti", UUID.randomUUID().toString()),
+                refreshTokenExpiryMs);
+    }
+
+    public String extractJti(String token) {
+        return extractClaim(token, c -> c.get("jti", String.class));
+    }
+
+    public java.util.Date extractExpiry(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    public java.util.Date extractIssuedAt(String token) {
+        return extractClaim(token, Claims::getIssuedAt);
     }
 
     private String buildToken(String subject, Map<String, Object> claims, long expiryMs) {

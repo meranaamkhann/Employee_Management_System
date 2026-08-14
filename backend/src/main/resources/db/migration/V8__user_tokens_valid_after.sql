@@ -1,0 +1,1 @@
+ALTER TABLE app_user ADD COLUMN tokens_valid_after TIMESTAMP;

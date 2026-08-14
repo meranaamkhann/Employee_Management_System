@@ -51,4 +51,10 @@ public class AuthController {
         authService.changePassword(request.getCurrentPassword(), request.getNewPassword());
         return ResponseEntity.ok(ApiResponse.message("Password updated."));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshRequest request) {
+        authService.logout(request.getRefreshToken());
+        return ResponseEntity.ok(ApiResponse.message("Logged out."));
+    }
 }

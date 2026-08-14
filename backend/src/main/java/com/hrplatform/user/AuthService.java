@@ -6,6 +6,8 @@ import com.hrplatform.audit.AuditService;
 import com.hrplatform.common.ApiException;
 import com.hrplatform.common.ErrorCode;
 import com.hrplatform.security.JwtService;
+import com.hrplatform.security.RevokedToken;
+import com.hrplatform.security.RevokedTokenRepository;
 import com.hrplatform.security.SecurityUtils;
 import com.hrplatform.user.dto.AuthResponse;
 import com.hrplatform.user.dto.LoginRequest;
@@ -18,6 +20,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.hrplatform.security.RevokedToken;
+import com.hrplatform.security.RevokedTokenRepository;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -37,6 +41,7 @@ public class AuthService {
     private final AuditService auditService;
     private final com.hrplatform.email.EmailService emailService;
     private final com.hrplatform.config.AppProperties appProperties;
+    private final RevokedTokenRepository revokedTokenRepository;
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
@@ -83,27 +88,59 @@ public class AuthService {
         return issueTokens(saved);
     }
 
-    @Transactional
-    public AuthResponse refresh(String refreshToken) {
-        String email;
-        try {
-            if (!"refresh".equals(jwtService.extractTokenType(refreshToken)) || jwtService.isExpired(refreshToken)) {
-                throw ApiException.unauthorized(ErrorCode.AUTH_TOKEN_EXPIRED, "Refresh token is invalid or expired.");
+        @Transactional
+            public AuthResponse refresh(String refreshToken) {
+                String email;
+                String jti;
+                try {
+                    if (!"refresh".equals(jwtService.extractTokenType(refreshToken)) || jwtService.isExpired(refreshToken)) {
+                        throw ApiException.unauthorized(ErrorCode.AUTH_TOKEN_EXPIRED, "Refresh token is invalid or expired.");
+                    }
+                    email = jwtService.extractEmail(refreshToken);
+                    jti = jwtService.extractJti(refreshToken);
+                } catch (JwtException | IllegalArgumentException e) {
+                    throw ApiException.unauthorized(ErrorCode.AUTH_TOKEN_INVALID, "Refresh token is invalid.");
+                }
+
+                if (jti != null && revokedTokenRepository.existsById(jti)) {
+                    throw ApiException.unauthorized(ErrorCode.AUTH_TOKEN_INVALID,
+                            "This refresh token has already been used or was revoked. Please log in again.");
+                }
+
+                User user = userRepository.findByEmailIgnoreCase(email)
+                        .orElseThrow(() -> ApiException.unauthorized(ErrorCode.AUTH_TOKEN_INVALID, "Refresh token is invalid."));
+
+                if (!user.isActive()) {
+                    throw ApiException.forbidden(ErrorCode.ACCESS_DENIED, "This account has been deactivated.");
+                }
+
+                if (user.getTokensValidAfter() != null
+                && jwtService.extractIssuedAt(refreshToken).toInstant().isBefore(user.getTokensValidAfter())) {
+            throw ApiException.unauthorized(ErrorCode.AUTH_TOKEN_INVALID,
+                    "Your session is no longer valid. Please log in again.");
+        }
+
+                // Rotation: the token just used is now single-use and gets revoked
+                // immediately, whether or not anything goes wrong afterwards.
+                if (jti != null) {
+                    revokedTokenRepository.save(new RevokedToken(jti, jwtService.extractExpiry(refreshToken).toInstant()));
+                }
+
+                return issueTokens(user);
             }
-            email = jwtService.extractEmail(refreshToken);
-        } catch (JwtException | IllegalArgumentException e) {
-            throw ApiException.unauthorized(ErrorCode.AUTH_TOKEN_INVALID, "Refresh token is invalid.");
-        }
 
-        User user = userRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> ApiException.unauthorized(ErrorCode.AUTH_TOKEN_INVALID, "Refresh token is invalid."));
-
-        if (!user.isActive()) {
-            throw ApiException.forbidden(ErrorCode.ACCESS_DENIED, "This account has been deactivated.");
-        }
-
-        return issueTokens(user);
-    }
+            @Transactional
+            public void logout(String refreshToken) {
+                try {
+                    String jti = jwtService.extractJti(refreshToken);
+                    if (jti != null && !revokedTokenRepository.existsById(jti)) {
+                        revokedTokenRepository.save(new RevokedToken(jti, jwtService.extractExpiry(refreshToken).toInstant()));
+                    }
+                } catch (JwtException | IllegalArgumentException e) {
+                    // Already-invalid token: nothing to revoke, and logout should never fail
+                    // client-side just because the token was already garbage.
+                }
+            }
 /**
      * Generates a real, time-limited reset token and emails a working link
      * via Resend. Always returns the same response to the caller regardless
@@ -137,6 +174,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setResetToken(null);
         user.setResetTokenExpiry(null);
+        user.setTokensValidAfter(Instant.now());
         userRepository.save(user);
     }
 
@@ -161,6 +199,7 @@ public class AuthService {
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
+         user.setTokensValidAfter(Instant.now());
         userRepository.save(user);
     }
 
