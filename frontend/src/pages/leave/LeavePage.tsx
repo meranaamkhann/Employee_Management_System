@@ -58,7 +58,7 @@ function MyLeaveTab() {
     defaultValues: { leaveType: 'CASUAL', startDate: '', endDate: '', reason: '' },
   })
 
-  async function onSubmit(values: any) {
+ async function onSubmit(values: { leaveType: string; startDate: string; endDate: string; reason: string }) {
     setFormError(null)
     try {
       await applyMutation.mutateAsync(values)

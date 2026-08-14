@@ -10,7 +10,6 @@ import { formatDate, formatTime, getErrorMessage } from '@/lib/format'
 import { Clock, LogIn, LogOut, CalendarCheck } from 'lucide-react'
 
 export default function AttendancePage() {
-  const { user } = useAuth()
   const currentMonth = new Date().toISOString().slice(0, 7)
   const [actionError, setActionError] = useState<string | null>(null)
 
