@@ -1,24 +1,22 @@
 package com.hrplatform.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolverCustomizer;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * Without this, ?size=999999 on any list endpoint (employees, attendance,
- * leave, payroll) loads that many rows into memory in one query. One
- * global cap fixes it everywhere at once instead of validating page size
- * in every controller individually.
- */
+import java.util.List;
+
 @Configuration
-public class WebConfig {
+public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
-    public PageableHandlerMethodArgumentResolverCustomizer pageableCustomizer() {
-        return resolver -> {
-            resolver.setMaxPageSize(100);
-            resolver.setFallbackPageable(PageRequest.of(0, 20));
-        };
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        PageableHandlerMethodArgumentResolver pageableResolver =
+                new PageableHandlerMethodArgumentResolver();
+
+        pageableResolver.setMaxPageSize(100);
+
+        resolvers.add(pageableResolver);
     }
 }

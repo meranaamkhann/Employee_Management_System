@@ -67,20 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return authUser
   }
 
-  async function logout() {
-    const refreshToken = getStoredRefreshToken() // however you currently read it
-    try {
-      if (refreshToken) {
-        await apiClient.post('/auth/logout', { refreshToken })
-      }
-    } catch {
-      // Best-effort — logout must always succeed client-side even if the
-      // network call fails or the token was already invalid.
-    } finally {
-      clearTokens()
-      setUser(null)
-      navigate('/login')
-    }
+  function logout() {
+    tokenStore.clear()
+    localStorage.removeItem(USER_KEY)
+    setUser(null)
   }
 
   function updateDisplayName(displayName: string) {

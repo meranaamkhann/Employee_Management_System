@@ -2,6 +2,7 @@ package com.hrplatform.config;
 
 import com.hrplatform.security.CustomUserDetailsService;
 import com.hrplatform.security.JwtAuthFilter;
+import com.hrplatform.security.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

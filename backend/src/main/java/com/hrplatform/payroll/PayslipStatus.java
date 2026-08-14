@@ -1,4 +1,4 @@
-=package com.hrplatform.payroll;
+package com.hrplatform.payroll;
 
 public enum PayslipStatus {
     DRAFT,

@@ -42,6 +42,7 @@ public class User {
      * the source of truth and this field is no longer read by the frontend.
      */
     private String displayName;
+    private Instant tokensValidAfter;
 
     @Column(nullable = false)
     private String passwordHash;

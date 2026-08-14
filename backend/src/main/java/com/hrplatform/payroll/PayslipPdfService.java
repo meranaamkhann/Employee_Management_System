@@ -1,4 +1,4 @@
-=package com.hrplatform.payroll;
+package com.hrplatform.payroll;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
@@ -25,7 +25,7 @@ public class PayslipPdfService {
             Font boldFont = new Font(Font.HELVETICA, 11, Font.BOLD);
 
             document.add(new Paragraph("Rosterly", titleFont));
-            document.add(new Paragraph("Payslip — " + p.getPayMonth(), labelFont));
+            document.add(new Paragraph("Payslip - " + p.getPayMonth(), labelFont));
             document.add(Chunk.NEWLINE);
 
             document.add(new Paragraph(p.getEmployee().getFullName() + " (" + p.getEmployee().getEmployeeCode() + ")", boldFont));
