@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { useAuth } from '@/lib/auth-context'
 import { useClockIn, useClockOut, useMonthlySummary, useMyAttendance } from '@/hooks/use-attendance'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
