@@ -1,9 +1,9 @@
 import { NavLink, Link } from 'react-router-dom'
 import clsx from "clsx";
-import { LayoutDashboard, Users, Building2, LogOut, Sun, Moon, User, Settings, History } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { useTheme } from '@/lib/theme-context'
 import { getDefaultRouteForRole } from '@/lib/routing'
+import { LayoutDashboard, Users, Building2, LogOut, Sun, Moon, User, Settings, History, Clock, CalendarDays } from 'lucide-react'
 
 const navItems = [
   { to: '/app/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'HR', 'MANAGER'] },
@@ -12,6 +12,8 @@ const navItems = [
   { to: '/app/activity', label: 'Activity', icon: History, roles: ['ADMIN', 'IT_ADMIN'] },
   { to: '/app/profile', label: 'Profile', icon: User, roles: ['ADMIN', 'IT_ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
   { to: '/app/settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'IT_ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
+   { to: '/app/attendance', label: 'Attendance', icon: Clock, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
+    { to: '/app/leave', label: 'Leave', icon: CalendarDays, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
 ]
 
 export function Sidebar() {

@@ -35,6 +35,8 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
+    private final com.hrplatform.email.EmailService emailService;
+    private final com.hrplatform.config.AppProperties appProperties;
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
@@ -102,27 +104,25 @@ public class AuthService {
 
         return issueTokens(user);
     }
-
-    /**
-     * Mock email verification flow: in a real deployment this would dispatch
-     * an email via an SMTP/SES provider. Here the reset token is generated
-     * and returned directly so the flow can be exercised end-to-end without
-     * external infrastructure. Swap this method's return for a mailer call
-     * to go to production.
+/**
+     * Generates a real, time-limited reset token and emails a working link
+     * via Resend. Always returns the same response to the caller regardless
+     * of whether the email exists, to avoid leaking account existence.
      */
     @Transactional
-    public String forgotPassword(String email) {
+    public void forgotPassword(String email) {
         User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
         if (user == null) {
-            // Deliberately don't reveal whether the email exists.
-            return null;
+            return;
         }
         String token = generateSecureToken();
         user.setResetToken(token);
         user.setResetTokenExpiry(Instant.now().plusSeconds(RESET_TOKEN_VALID_MINUTES * 60));
         userRepository.save(user);
-        log.info("[MOCK EMAIL] Password reset link for {}: /reset-password?token={}", email, token);
-        return token;
+
+        String resetLink = appProperties.getFrontendUrl() + "/reset-password?token=" + token;
+        String recipientName = user.getEmployee() != null ? user.getEmployee().getFullName() : user.getDisplayName();
+        emailService.sendPasswordResetEmail(user.getEmail(), recipientName, resetLink);
     }
 
     @Transactional

@@ -156,3 +156,61 @@ export interface AuditLogEntry {
   summary?: string
   createdAt: string
 }
+
+export type AttendanceStatus = 'PRESENT' | 'LATE' | 'HALF_DAY' | 'ABSENT' | 'ON_LEAVE'
+
+export interface AttendanceRecord {
+  id: string
+  employee: EmployeeSummary
+  workDate: string
+  clockIn?: string
+  clockOut?: string
+  status: AttendanceStatus
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MonthlySummary {
+  employeeId: string
+  employeeName: string
+  month: string
+  presentDays: number
+  lateDays: number
+  halfDays: number
+  absentDays: number
+  onLeaveDays: number
+  totalRecorded: number
+}
+
+export type LeaveType = 'CASUAL' | 'SICK' | 'EARNED' | 'UNPAID'
+export type LeaveStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
+
+export interface LeaveRequestItem {
+  id: string
+  employee: EmployeeSummary
+  leaveType: LeaveType
+  startDate: string
+  endDate: string
+  numberOfDays: number
+  reason?: string
+  status: LeaveStatus
+  reviewedBy?: EmployeeSummary
+  reviewNote?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface LeaveBalanceItem {
+  leaveType: LeaveType
+  year: number
+  allocatedDays: number
+  usedDays: number
+  remainingDays: number
+}
+
+export interface Holiday {
+  id: string
+  date: string
+  name: string
+}

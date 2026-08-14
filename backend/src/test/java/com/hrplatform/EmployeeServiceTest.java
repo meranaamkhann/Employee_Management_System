@@ -209,7 +209,6 @@ class EmployeeServiceTest {
         assertThat(employee.getDeletedAt()).isNull();
     }
 
-    // ---- employee code generation with collision retry ----------------------
 
     @Test
     void create_retriesEmployeeCodeOnCollision() {

@@ -91,9 +91,6 @@ public class Employee {
     @Column(length = 500)
     private String photoUrl;
 
-    @Column(length = 500)
-    private String photoUrl;
-
     @Column(name = "photo_public_id", length = 255)
     private String photoPublicId;
 

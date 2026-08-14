@@ -1,15 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import clsx from 'clsx'
+import { Camera, X } from 'lucide-react'
+
 import { employeeSchema, EmployeeFormValues } from '@/lib/schemas'
-import { useCreateEmployee, useEmployees, useUpdateEmployee } from '@/hooks/use-employees'
+import {
+  useCreateEmployee,
+  useEmployees,
+  useUpdateEmployee,
+  useUploadEmployeePhoto,
+  useRemoveEmployeePhoto,
+} from '@/hooks/use-employees'
 import { useDepartments } from '@/hooks/use-departments'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Button } from '@/components/ui/Button'
-import { getErrorMessage, getFieldErrors } from '@/lib/format'
+import {
+  getErrorMessage,
+  getFieldErrors,
+  initials,
+} from '@/lib/format'
 import type { Employee } from '@/types/api'
 
 const sections = [
@@ -34,12 +46,27 @@ export function EmployeeFormModal({
   readOnly?: boolean
 }) {
   const isEdit = !!employee
+
   const { data: departments } = useDepartments()
   const { data: managerOptions } = useEmployees({ size: 100 })
+
   const createMutation = useCreateEmployee()
   const updateMutation = useUpdateEmployee(employee?.id ?? '')
+
+  const uploadPhotoMutation = useUploadEmployeePhoto(
+    employee?.id ?? '',
+  )
+
+  const removePhotoMutation = useRemoveEmployeePhoto(
+    employee?.id ?? '',
+  )
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const [serverError, setServerError] = useState<string | null>(null)
-  const [activeSection, setActiveSection] = useState<SectionKey>('basic')
+  const [photoError, setPhotoError] = useState<string | null>(null)
+  const [activeSection, setActiveSection] =
+    useState<SectionKey>('basic')
 
   const {
     register,
@@ -47,7 +74,9 @@ export function EmployeeFormModal({
     reset,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<EmployeeFormValues>({ resolver: zodResolver(employeeSchema) })
+  } = useForm<EmployeeFormValues>({
+    resolver: zodResolver(employeeSchema),
+  })
 
   useEffect(() => {
     if (isOpen) {
@@ -65,40 +94,82 @@ export function EmployeeFormModal({
               salary: employee.salary,
               status: employee.status,
               managerId: employee.manager?.id ?? '',
-              emergencyContactName: employee.emergencyContactName ?? '',
-              emergencyContactPhone: employee.emergencyContactPhone ?? '',
+              emergencyContactName:
+                employee.emergencyContactName ?? '',
+              emergencyContactPhone:
+                employee.emergencyContactPhone ?? '',
               addressLine: employee.addressLine ?? '',
               city: employee.city ?? '',
               country: employee.country ?? '',
               notes: employee.notes ?? '',
             }
-          : { salary: 0, status: 'ACTIVE' },
+          : {
+              salary: 0,
+              status: 'ACTIVE',
+            },
       )
+
       setServerError(null)
+      setPhotoError(null)
       setActiveSection('basic')
     }
   }, [isOpen, employee, reset])
 
+  async function handlePhotoSelect(
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = e.target.files?.[0]
+
+    if (!file) return
+
+    setPhotoError(null)
+
+    try {
+      await uploadPhotoMutation.mutateAsync(file)
+    } catch (err) {
+      setPhotoError(getErrorMessage(err))
+    } finally {
+      e.target.value = ''
+    }
+  }
+
+  async function handlePhotoRemove() {
+    setPhotoError(null)
+
+    try {
+      await removePhotoMutation.mutateAsync()
+    } catch (err) {
+      setPhotoError(getErrorMessage(err))
+    }
+  }
+
   async function onSubmit(values: EmployeeFormValues) {
     setServerError(null)
+
     const payload = {
       ...values,
       phone: values.phone || undefined,
       departmentId: values.departmentId || undefined,
       managerId: values.managerId || undefined,
     }
+
     try {
       if (isEdit) {
         await updateMutation.mutateAsync(payload)
       } else {
         await createMutation.mutateAsync(payload)
       }
+
       onClose()
     } catch (err) {
       const fieldErrors = getFieldErrors(err)
+
       if (fieldErrors) {
-        Object.entries(fieldErrors).forEach(([field, message]) =>
-          setError(field as keyof EmployeeFormValues, { message }),
+        Object.entries(fieldErrors).forEach(
+          ([field, message]) =>
+            setError(field as keyof EmployeeFormValues, {
+              message,
+            }),
         )
       } else {
         setServerError(getErrorMessage(err))
@@ -106,13 +177,27 @@ export function EmployeeFormModal({
     }
   }
 
-  const title = readOnly ? 'Employee details' : isEdit ? 'Edit employee' : 'Add employee'
+  const title = readOnly
+    ? 'Employee details'
+    : isEdit
+      ? 'Edit employee'
+      : 'Add employee'
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="max-w-2xl">
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      maxWidth="max-w-2xl"
+    >
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         {serverError && (
-          <div className="rounded-lg bg-signal-rose/10 px-3.5 py-2.5 text-sm text-signal-rose">{serverError}</div>
+          <div className="rounded-lg bg-signal-rose/10 px-3.5 py-2.5 text-sm text-signal-rose">
+            {serverError}
+          </div>
         )}
 
         <div className="flex flex-wrap gap-1 border-b border-paper-200 pb-3 dark:border-ink-700">
@@ -136,33 +221,153 @@ export function EmployeeFormModal({
         <fieldset disabled={readOnly} className="contents">
           {activeSection === 'basic' && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input label="Full name" error={errors.fullName?.message} {...register('fullName')} />
-              <Input label="Email" type="email" error={errors.email?.message} {...register('email')} />
-              <Input label="Phone" error={errors.phone?.message} {...register('phone')} />
-              <Select label="Gender" error={errors.gender?.message} {...register('gender')}>
+              {/* Profile photo - edit mode only */}
+              {isEdit && (
+                <div className="flex items-center gap-4 rounded-lg border border-paper-200 p-4 dark:border-ink-700 sm:col-span-2">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-paper-200 dark:bg-ink-700">
+                    {employee?.photoUrl ? (
+                      <img
+                        src={employee.photoUrl}
+                        alt={employee.fullName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-lg font-medium text-ink-600 dark:text-paper-300/60">
+                        {initials(employee?.fullName ?? '')}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() =>
+                          fileInputRef.current?.click()
+                        }
+                        disabled={
+                          readOnly ||
+                          uploadPhotoMutation.isPending
+                        }
+                      >
+                        <Camera size={16} />
+                        {uploadPhotoMutation.isPending
+                          ? 'Uploading…'
+                          : 'Change photo'}
+                      </Button>
+
+                      {employee?.photoUrl && !readOnly && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={handlePhotoRemove}
+                          disabled={
+                            removePhotoMutation.isPending
+                          }
+                        >
+                          <X size={16} />
+                          {removePhotoMutation.isPending
+                            ? 'Removing…'
+                            : 'Remove'}
+                        </Button>
+                      )}
+                    </div>
+
+                    {photoError && (
+                      <p className="text-xs text-signal-rose">
+                        {photoError}
+                      </p>
+                    )}
+
+                    <p className="text-xs text-ink-600/60 dark:text-paper-300/50">
+                      JPEG, PNG or WEBP. Max 5MB.
+                    </p>
+                  </div>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handlePhotoSelect}
+                  />
+                </div>
+              )}
+
+              <Input
+                label="Full name"
+                error={errors.fullName?.message}
+                {...register('fullName')}
+              />
+
+              <Input
+                label="Email"
+                type="email"
+                error={errors.email?.message}
+                {...register('email')}
+              />
+
+              <Input
+                label="Phone"
+                error={errors.phone?.message}
+                {...register('phone')}
+              />
+
+              <Select
+                label="Gender"
+                error={errors.gender?.message}
+                {...register('gender')}
+              >
                 <option value="">Prefer not to say</option>
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
                 <option value="OTHER">Other</option>
-                <option value="UNDISCLOSED">Undisclosed</option>
+                <option value="UNDISCLOSED">
+                  Undisclosed
+                </option>
               </Select>
-              <Input label="Date of birth" type="date" error={errors.dateOfBirth?.message} {...register('dateOfBirth')} />
+
+              <Input
+                label="Date of birth"
+                type="date"
+                error={errors.dateOfBirth?.message}
+                {...register('dateOfBirth')}
+              />
+
               <div />
             </div>
           )}
 
           {activeSection === 'employment' && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input label="Joining date" type="date" error={errors.joiningDate?.message} {...register('joiningDate')} />
-              <Select label="Department" error={errors.departmentId?.message} {...register('departmentId')}>
+              <Input
+                label="Joining date"
+                type="date"
+                error={errors.joiningDate?.message}
+                {...register('joiningDate')}
+              />
+
+              <Select
+                label="Department"
+                error={errors.departmentId?.message}
+                {...register('departmentId')}
+              >
                 <option value="">Unassigned</option>
+
                 {departments?.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
                   </option>
                 ))}
               </Select>
-              <Input label="Designation" error={errors.designation?.message} {...register('designation')} />
+
+              <Input
+                label="Designation"
+                error={errors.designation?.message}
+                {...register('designation')}
+              />
+
               <Input
                 label="Salary (annual)"
                 type="number"
@@ -170,16 +375,29 @@ export function EmployeeFormModal({
                 error={errors.salary?.message}
                 {...register('salary')}
               />
-              <Select label="Status" error={errors.status?.message} {...register('status')}>
+
+              <Select
+                label="Status"
+                error={errors.status?.message}
+                {...register('status')}
+              >
                 <option value="ACTIVE">Active</option>
                 <option value="ON_LEAVE">On leave</option>
                 <option value="SUSPENDED">Suspended</option>
                 <option value="TERMINATED">Terminated</option>
               </Select>
-              <Select label="Manager" error={errors.managerId?.message} {...register('managerId')}>
+
+              <Select
+                label="Manager"
+                error={errors.managerId?.message}
+                {...register('managerId')}
+              >
                 <option value="">No manager</option>
+
                 {managerOptions?.content
-                  .filter((m) => m.id !== employee?.id)
+                  .filter(
+                    (m) => m.id !== employee?.id,
+                  )
                   .map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.fullName} ({m.employeeCode})
@@ -191,22 +409,44 @@ export function EmployeeFormModal({
 
           {activeSection === 'emergency' && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input label="Emergency contact name" {...register('emergencyContactName')} />
-              <Input label="Emergency contact phone" {...register('emergencyContactPhone')} />
+              <Input
+                label="Emergency contact name"
+                {...register('emergencyContactName')}
+              />
+
+              <Input
+                label="Emergency contact phone"
+                {...register('emergencyContactPhone')}
+              />
             </div>
           )}
 
           {activeSection === 'address' && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input label="Address" className="sm:col-span-2" {...register('addressLine')} />
-              <Input label="City" {...register('city')} />
-              <Input label="Country" {...register('country')} />
+              <Input
+                label="Address"
+                className="sm:col-span-2"
+                {...register('addressLine')}
+              />
+
+              <Input
+                label="City"
+                {...register('city')}
+              />
+
+              <Input
+                label="Country"
+                {...register('country')}
+              />
             </div>
           )}
 
           {activeSection === 'notes' && (
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-ink-800 dark:text-paper-200">Notes</label>
+              <label className="text-sm font-medium text-ink-800 dark:text-paper-200">
+                Notes
+              </label>
+
               <textarea
                 className="min-h-32 w-full rounded-lg border border-paper-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 focus:border-brass-500 focus:outline-none focus:ring-2 focus:ring-brass-400/50 dark:border-ink-600 dark:bg-ink-800 dark:text-paper-50"
                 {...register('notes')}
@@ -217,15 +457,27 @@ export function EmployeeFormModal({
 
         <div className="mt-2 flex justify-end gap-3">
           {readOnly ? (
-            <Button type="button" variant="secondary" onClick={onClose}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+            >
               Close
             </Button>
           ) : (
             <>
-              <Button type="button" variant="secondary" onClick={onClose}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onClose}
+              >
                 Cancel
               </Button>
-              <Button type="submit" isLoading={isSubmitting}>
+
+              <Button
+                type="submit"
+                isLoading={isSubmitting}
+              >
                 {isEdit ? 'Save changes' : 'Add employee'}
               </Button>
             </>

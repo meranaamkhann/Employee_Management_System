@@ -7,5 +7,7 @@ public enum AuditAction {
     RESTORE,
     DEACTIVATE,
     ROLE_CHANGE,
-    LOGIN
+    LOGIN,
+    APPROVE,
+    REJECT
 }

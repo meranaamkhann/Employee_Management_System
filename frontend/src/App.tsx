@@ -13,6 +13,8 @@ import ActivityPage from '@/pages/activity/ActivityPage'
 import NotFoundPage from '@/pages/errors/NotFoundPage'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
+import AttendancePage from '@/pages/attendance/AttendancePage'
+import LeavePage from '@/pages/leave/LeavePage'
 
 export default function App() {
   return (
@@ -39,6 +41,8 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
+       <Route path="attendance" element={<AttendancePage />} />
+       <Route path="leave" element={<LeavePage />} />
     </Routes>
   )
 }

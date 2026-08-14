@@ -110,3 +110,33 @@ export async function exportEmployeesCsv(filters: Omit<EmployeeFilters, 'page' |
   link.remove()
   window.URL.revokeObjectURL(url)
 }
+
+export function useUploadEmployeePhoto(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      const { data } = await apiClient.post<ApiResponse<Employee>>(`/employees/${id}/photo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      return data.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] })
+    },
+  })
+}
+
+export function useRemoveEmployeePhoto(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await apiClient.delete<ApiResponse<Employee>>(`/employees/${id}/photo`)
+      return data.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] })
+    },
+  })
+}

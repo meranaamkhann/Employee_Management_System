@@ -36,3 +36,8 @@ export function initials(name: string): string {
     .map((p) => p[0]?.toUpperCase())
     .join('')
 }
+
+export function formatTime(value?: string): string {
+  if (!value) return '—'
+  return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}

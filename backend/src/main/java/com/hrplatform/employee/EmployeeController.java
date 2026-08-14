@@ -147,6 +147,19 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.ok("Employee updated.", employeeService.update(id, request)));
     }
 
+    @PostMapping(value = "/{id}/photo", consumes = "multipart/form-data")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> uploadPhoto(
+            @PathVariable String id, @RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(ApiResponse.ok("Photo updated.", employeeService.uploadPhoto(id, file)));
+    }
+
+    @DeleteMapping("/{id}/photo")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> removePhoto(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.ok("Photo removed.", employeeService.removePhoto(id)));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {

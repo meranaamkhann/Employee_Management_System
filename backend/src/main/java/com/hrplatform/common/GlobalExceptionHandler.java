@@ -63,6 +63,13 @@ public class GlobalExceptionHandler {
                 "Something went wrong on our end. Please try again.", null, request);
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSize(
+            org.springframework.web.multipart.MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, ErrorCode.FILE_TOO_LARGE.name(),
+                "File is too large.", null, request);
+    }
+
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String code, String message,
                                                   Map<String, String> fieldErrors, HttpServletRequest request) {
         ErrorResponse body = ErrorResponse.builder()
