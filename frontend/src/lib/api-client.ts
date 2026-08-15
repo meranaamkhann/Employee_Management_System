@@ -5,6 +5,8 @@ const ACCESS_TOKEN_KEY = 'hr_access_token'
 const REFRESH_TOKEN_KEY = 'hr_refresh_token'
 const USER_KEY = 'hr_user'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
+
 export const tokenStore = {
   getAccessToken: () => localStorage.getItem(ACCESS_TOKEN_KEY),
   getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY),
@@ -18,8 +20,6 @@ export const tokenStore = {
     localStorage.removeItem(USER_KEY)
   },
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
