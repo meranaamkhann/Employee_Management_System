@@ -19,8 +19,10 @@ export const tokenStore = {
   },
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
+
 export const apiClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -40,7 +42,7 @@ async function refreshAccessToken(): Promise<string> {
   const refreshToken = tokenStore.getRefreshToken()
   if (!refreshToken) throw new Error('No refresh token available')
 
-  const response = await axios.post<ApiResponse<AuthResponse>>('/api/v1/auth/refresh', { refreshToken })
+  const response = await axios.post<ApiResponse<AuthResponse>>(`${API_BASE_URL}/auth/refresh`, { refreshToken })
   const { accessToken, refreshToken: newRefreshToken } = response.data.data
   tokenStore.setTokens(accessToken, newRefreshToken)
   return accessToken
