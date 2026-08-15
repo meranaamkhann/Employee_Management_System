@@ -112,12 +112,12 @@ function PayrollAdminView() {
             <tbody>
               {data.content.map((p) => (
                 <tr key={p.id} className="border-b border-paper-100 last:border-0 dark:border-ink-800">
-                  <td className="px-4 py-3">{p.employee.fullName}</td>
-                  <td className="px-4 py-3">₹{p.grossEarnings.toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3">{p.employee?.fullName ?? '—'}</td>
+                  <td className="px-4 py-3">₹{(p.grossEarnings ?? 0).toLocaleString('en-IN')}</td>
                   <td className="px-4 py-3">
-                    ₹{(p.providentFund + p.professionalTax + p.unpaidLeaveDeduction).toLocaleString('en-IN')}
+                    ₹{((p.providentFund ?? 0) + (p.professionalTax ?? 0) + (p.unpaidLeaveDeduction ?? 0)).toLocaleString('en-IN')}
                   </td>
-                  <td className="px-4 py-3 font-medium">₹{p.netSalary.toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3 font-medium">₹{(p.netSalary ?? 0).toLocaleString('en-IN')}</td>
                   <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
                   <td className="flex gap-2 px-4 py-3">
                     {p.status === 'DRAFT' && (
