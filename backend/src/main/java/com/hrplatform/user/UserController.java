@@ -47,4 +47,10 @@ public class UserController {
         userService.changeRole(id, newRole, SecurityUtils.currentUser().getUserId());
         return ResponseEntity.ok(ApiResponse.message("Role updated."));
     }
+
+    @PatchMapping("/{id}/link-employee")
+    public ResponseEntity<ApiResponse<Void>> linkEmployee(@PathVariable String id, @RequestBody Map<String, String> body) {
+        userService.linkEmployee(id, body.get("employeeId"));
+        return ResponseEntity.ok(ApiResponse.message("Employee profile linked."));
+    }
 }

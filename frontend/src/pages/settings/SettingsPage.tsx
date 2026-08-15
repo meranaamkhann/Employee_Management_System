@@ -8,7 +8,8 @@ import { useAuth } from '@/lib/auth-context'
 import { useTheme } from '@/lib/theme-context'
 import { apiClient } from '@/lib/api-client'
 import { changePasswordSchema, ChangePasswordFormValues } from '@/lib/schemas'
-import { useChangeUserRole, useCreateUser, useDeactivateUser, useUsers } from '@/hooks/use-users'
+import { useChangeUserRole, useCreateUser, useDeactivateUser, useLinkEmployee, useUsers } from '@/hooks/use-users'
+import { useEmployees } from '@/hooks/use-employees'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -234,9 +235,20 @@ type CreateUserValues = z.infer<typeof createUserSchema>
 
 function TeamAccountsSection() {
   const { data: users, isLoading } = useUsers()
+  const { data: employeePage } = useEmployees({ size: 100 })
   const createMutation = useCreateUser()
   const deactivateMutation = useDeactivateUser()
   const changeRoleMutation = useChangeUserRole()
+  const linkEmployeeMutation = useLinkEmployee()
+
+  async function handleLinkEmployee(userId: string, employeeId: string) {
+    if (!employeeId) return
+    try {
+      await linkEmployeeMutation.mutateAsync({ id: userId, employeeId })
+    } catch (err) {
+      alert(getErrorMessage(err))
+    }
+  }
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -317,6 +329,22 @@ function TeamAccountsSection() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  {!account.employeeId && (
+                    <Select
+                      defaultValue=""
+                      onChange={(e) => handleLinkEmployee(account.id, e.target.value)}
+                      className="!py-1.5 text-xs"
+                    >
+                      <option value="" disabled>
+                        Link employee…
+                      </option>
+                      {employeePage?.content.map((emp) => (
+                        <option key={emp.id} value={emp.id}>
+                          {emp.fullName}
+                        </option>
+                      ))}
+                    </Select>
+                  )}
                   <Select
                     value={account.role}
                     onChange={(e) => handleRoleChange(account.id, e.target.value as Role)}

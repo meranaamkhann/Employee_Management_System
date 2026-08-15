@@ -100,6 +100,24 @@ public class UserService {
                 "Changed " + user.getEmail() + " from " + previousRole + " to " + newRole);
     }
 
+    @Transactional
+    public void linkEmployee(String userId, String employeeId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> ApiException.notFound("Account not found."));
+
+        if (employeeId == null || employeeId.isBlank()) {
+            throw ApiException.badRequest(ErrorCode.VALIDATION_FAILED, "employeeId is required.");
+        }
+
+        Employee employee = employeeRepository.findByIdAndDeletedFalse(employeeId)
+                .orElseThrow(() -> ApiException.badRequest(ErrorCode.VALIDATION_FAILED, "Selected employee does not exist."));
+
+        user.setEmployee(employee);
+        userRepository.save(user);
+        auditService.record(AuditEntityType.USER_ACCOUNT, user.getId(), AuditAction.UPDATE,
+                "Linked " + user.getEmail() + " to employee " + employee.getFullName());
+    }
+
     private UserResponse toResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())

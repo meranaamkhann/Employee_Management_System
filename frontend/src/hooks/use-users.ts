@@ -49,3 +49,13 @@ export function useChangeUserRole() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   })
 }
+
+export function useLinkEmployee() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, employeeId }: { id: string; employeeId: string }) => {
+      await apiClient.patch(`/users/${id}/link-employee`, { employeeId })
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+  })
+}

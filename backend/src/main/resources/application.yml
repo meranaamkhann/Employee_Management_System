@@ -52,6 +52,12 @@ app:
     from-address: ${MAIL_FROM_ADDRESS:onboarding@resend.dev}
     from-name: ${MAIL_FROM_NAME:Rosterly}
 
+    app:
+  seed:
+    admin-email: ${ADMIN_EMAIL:admin@hrplatform.local}
+    admin-password: ${ADMIN_PASSWORD:ChangeMe@2026}
+    demo-data: ${SEED_DEMO_DATA:true}
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
