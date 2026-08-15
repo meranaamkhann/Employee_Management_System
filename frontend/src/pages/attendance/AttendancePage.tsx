@@ -7,8 +7,10 @@ import { TableSkeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { formatDate, formatTime, getErrorMessage } from '@/lib/format'
 import { Clock, LogIn, LogOut, CalendarCheck } from 'lucide-react'
+import { useAuth } from '@/lib/auth-context'
 
 export default function AttendancePage() {
+  const { user } = useAuth()
   const currentMonth = new Date().toISOString().slice(0, 7)
   const [actionError, setActionError] = useState<string | null>(null)
 
@@ -38,6 +40,26 @@ export default function AttendancePage() {
     } catch (err) {
       setActionError(getErrorMessage(err))
     }
+  }
+   if (!user?.employeeId) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div>
+          <h1 className="font-display text-2xl text-ink-900 dark:text-paper-50">Attendance</h1>
+          <p className="mt-1 text-sm text-ink-600 dark:text-paper-300/60">Your clock-in history and this month's summary.</p>
+        </div>
+        <Card className="p-8 text-center">
+          <Clock size={32} className="mx-auto mb-3 text-ink-600/40 dark:text-paper-300/30" />
+          <p className="text-sm font-medium text-ink-900 dark:text-paper-50">No employee profile linked</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-ink-600 dark:text-paper-300/60">
+            This account isn't linked to an employee record, so personal clock-in tracking isn't available here.
+            {user?.role === 'ADMIN' || user?.role === 'HR'
+              ? ' You can still manage attendance for your team from the Employees page.'
+              : ' Contact HR to have your account linked to your employee profile.'}
+          </p>
+        </Card>
+      </div>
+    )
   }
 
   return (

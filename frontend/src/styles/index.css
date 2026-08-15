@@ -6,8 +6,8 @@
   html {
     scroll-behavior: smooth;
   }
-  body {
-    @apply bg-paper-100 text-ink-900 antialiased;
+body {
+    @apply bg-paper-100 text-ink-900 antialiased dark:bg-ink-950 dark:text-paper-50;
     font-feature-settings: "cv11", "ss01";
   }
   ::selection {

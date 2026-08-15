@@ -48,6 +48,7 @@ export default function LeavePage() {
 }
 
 function MyLeaveTab() {
+  const { user } = useAuth()
   const { data: balances } = useMyLeaveBalances()
   const { data: requests } = useMyLeaveRequests()
   const applyMutation = useApplyLeave()
@@ -58,7 +59,22 @@ function MyLeaveTab() {
     defaultValues: { leaveType: 'CASUAL', startDate: '', endDate: '', reason: '' },
   })
 
- async function onSubmit(values: { leaveType: string; startDate: string; endDate: string; reason: string }) {
+  if (!user?.employeeId) {
+    return (
+      <Card className="p-8 text-center">
+        <CalendarDays size={32} className="mx-auto mb-3 text-ink-600/40 dark:text-paper-300/30" />
+        <p className="text-sm font-medium text-ink-900 dark:text-paper-50">No employee profile linked</p>
+        <p className="mx-auto mt-1 max-w-sm text-sm text-ink-600 dark:text-paper-300/60">
+          This account isn't linked to an employee record, so applying for leave isn't available here.
+          {user?.role === 'ADMIN' || user?.role === 'HR'
+            ? " Switch to the Approvals tab to review your team's leave requests."
+            : ' Contact HR to have your account linked to your employee profile.'}
+        </p>
+      </Card>
+    )
+  }
+
+  async function onSubmit(values: { leaveType: string; startDate: string; endDate: string; reason: string }) {
     setFormError(null)
     try {
       await applyMutation.mutateAsync(values)
