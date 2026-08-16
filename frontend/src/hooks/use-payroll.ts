@@ -70,6 +70,6 @@ export async function downloadPayslipPdf(id: string, payMonth: string) {
     link.remove()
     window.URL.revokeObjectURL(url)
   } catch {
-    
+   return  
   }
 }
