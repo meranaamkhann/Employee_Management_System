@@ -69,7 +69,8 @@ export async function downloadPayslipPdf(id: string, payMonth: string) {
     link.click()
     link.remove()
     window.URL.revokeObjectURL(url)
-  } catch {
-   return  
+  } catch (err) {
+    console.error('Payslip PDF download failed:', err)
+    alert('Could not download this payslip. Check the console for details.')
   }
 }
