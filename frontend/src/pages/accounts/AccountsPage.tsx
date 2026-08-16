@@ -59,7 +59,10 @@ export default function AccountsPage() {
                   <td className="px-4 py-3">{u.email}</td>
                   <td className="px-4 py-3">{u.role}</td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={u.active ? 'ACTIVE' : 'INACTIVE'} />
+                    <span className={ u.active ? 'inline-flex items-center gap-1.5 rounded-full bg-signal-green/10 px-2.5 py-1 text-xs font-medium text-signal-green ring-1 ring-signal-green/25' : 'inline-flex items-center gap-1.5 rounded-full bg-slate-450/10 px-2.5 py-1 text-xs font-medium text-slate-450 ring-1 ring-slate-450/25' } >
+                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                            {u.active ? 'Active' : 'Inactive'}
+                            </span>
                   </td>
                   <td className="px-4 py-3">
                     {u.employeeName ? (

@@ -12,7 +12,7 @@ export interface AttendanceFilters {
   size?: number
 }
 
-export function useMyAttendance(filters: { from?: string; to?: string; page?: number }) {
+export function useMyAttendance(filters: { from?: string; to?: string; page?: number }, enabled = true) {
   return useQuery({
     queryKey: ['attendance-me', filters],
     queryFn: async () => {
@@ -21,6 +21,7 @@ export function useMyAttendance(filters: { from?: string; to?: string; page?: nu
       })
       return data.data
     },
+    enabled,
   })
 }
 
@@ -37,7 +38,7 @@ export function useAttendanceSearch(filters: AttendanceFilters) {
   })
 }
 
-export function useMonthlySummary(month: string, employeeId?: string) {
+export function useMonthlySummary(month: string, employeeId?: string, enabled = true) {
   return useQuery({
     queryKey: ['attendance-summary', month, employeeId],
     queryFn: async () => {
@@ -46,7 +47,7 @@ export function useMonthlySummary(month: string, employeeId?: string) {
       })
       return data.data
     },
-    enabled: !!month,
+    enabled: enabled && !!month,
   })
 }
 

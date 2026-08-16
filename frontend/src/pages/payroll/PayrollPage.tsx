@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { StatusBadge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { NoEmployeeLinkedState } from '@/components/ui/NoEmployeeLinkedState'
 import { getErrorMessage } from '@/lib/format'
 import { Wallet, Download } from 'lucide-react'
 
@@ -19,7 +20,26 @@ export default function PayrollPage() {
 }
 
 function MyPayslipsView() {
-  const { data } = useMyPayslips()
+  const { user } = useAuth()
+  const hasEmployee = !!user?.employeeId
+  const { data } = useMyPayslips(undefined, hasEmployee)
+
+  if (!hasEmployee) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div>
+          <h1 className="font-display text-2xl text-ink-900 dark:text-paper-50">My Payslips</h1>
+          <p className="mt-1 text-sm text-ink-600 dark:text-paper-300/60">Download or review your monthly payslips.</p>
+        </div>
+        <NoEmployeeLinkedState
+          icon={Wallet}
+          feature="payslips"
+          adminHint="Payslips are generated per employee from the Payroll admin view."
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -43,7 +63,7 @@ function MyPayslipsView() {
               {data.content.map((p) => (
                 <tr key={p.id} className="border-b border-paper-100 last:border-0 dark:border-ink-800">
                   <td className="px-4 py-3">{p.payMonth}</td>
-                  <td className="px-4 py-3">₹{p.netSalary.toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3">₹{(p.netSalary ?? 0).toLocaleString('en-IN')}</td>
                   <td className="px-4 py-3"><StatusBadge status={p.status} /></td>
                   <td className="px-4 py-3">
                     <Button variant="secondary" onClick={() => downloadPayslipPdf(p.id, p.payMonth)}>

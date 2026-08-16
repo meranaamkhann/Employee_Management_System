@@ -2,13 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import type { ApiResponse, PageResponse, Payslip } from '@/types/api'
 
-export function useMyPayslips(month?: string) {
+export function useMyPayslips(month?: string, enabled = true) {
   return useQuery({
     queryKey: ['payslips-me', month],
     queryFn: async () => {
       const { data } = await apiClient.get<ApiResponse<PageResponse<Payslip>>>('/payroll/me', { params: { month } })
       return data.data
     },
+    enabled,
   })
 }
 
@@ -57,14 +58,18 @@ export function useMarkPayslipPaid() {
 }
 
 export async function downloadPayslipPdf(id: string, payMonth: string) {
-  const response = await apiClient.get(`/payroll/${id}/pdf`, { responseType: 'blob' })
-  const blob = new Blob([response.data], { type: 'application/pdf' })
-  const url = window.URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `payslip-${payMonth}.pdf`
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  window.URL.revokeObjectURL(url)
+  try {
+    const response = await apiClient.get(`/payroll/${id}/pdf`, { responseType: 'blob' })
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `payslip-${payMonth}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch {
+    
+  }
 }

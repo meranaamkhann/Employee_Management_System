@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { NoEmployeeLinkedState } from '@/components/ui/NoEmployeeLinkedState'
 import { formatDate, getErrorMessage } from '@/lib/format'
 import { CalendarDays, Check, X } from 'lucide-react'
 
@@ -49,8 +50,9 @@ export default function LeavePage() {
 
 function MyLeaveTab() {
   const { user } = useAuth()
-  const { data: balances } = useMyLeaveBalances()
-  const { data: requests } = useMyLeaveRequests()
+  const hasEmployee = !!user?.employeeId
+  const { data: balances } = useMyLeaveBalances(hasEmployee)
+  const { data: requests } = useMyLeaveRequests(hasEmployee)
   const applyMutation = useApplyLeave()
   const cancelMutation = useCancelLeave()
   const [formError, setFormError] = useState<string | null>(null)
@@ -59,23 +61,22 @@ function MyLeaveTab() {
     defaultValues: { leaveType: 'CASUAL', startDate: '', endDate: '', reason: '' },
   })
 
-  if (!user?.employeeId) {
+  if (!hasEmployee) {
     return (
-      <Card className="p-8 text-center">
-        <CalendarDays size={32} className="mx-auto mb-3 text-ink-600/40 dark:text-paper-300/30" />
-        <p className="text-sm font-medium text-ink-900 dark:text-paper-50">No employee profile linked</p>
-        <p className="mx-auto mt-1 max-w-sm text-sm text-ink-600 dark:text-paper-300/60">
-          This account isn't linked to an employee record, so applying for leave isn't available here.
-          {user?.role === 'ADMIN' || user?.role === 'HR'
-            ? " Switch to the Approvals tab to review your team's leave requests."
-            : ' Contact HR to have your account linked to your employee profile.'}
-        </p>
-      </Card>
+      <NoEmployeeLinkedState
+        icon={CalendarDays}
+        feature="applying for leave"
+        adminHint="Switch to the Approvals tab to review your team's leave requests."
+      />
     )
   }
 
   async function onSubmit(values: { leaveType: string; startDate: string; endDate: string; reason: string }) {
     setFormError(null)
+    if (values.endDate < values.startDate) {
+      setFormError('End date cannot be before the start date.')
+      return
+    }
     try {
       await applyMutation.mutateAsync(values)
       reset()

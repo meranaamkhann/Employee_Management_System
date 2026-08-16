@@ -2,23 +2,25 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import type { ApiResponse, Holiday, LeaveBalanceItem, LeaveRequestItem, PageResponse } from '@/types/api'
 
-export function useMyLeaveRequests() {
+export function useMyLeaveRequests(enabled = true) {
   return useQuery({
     queryKey: ['leave-requests-me'],
     queryFn: async () => {
       const { data } = await apiClient.get<ApiResponse<PageResponse<LeaveRequestItem>>>('/leave/requests/me')
       return data.data
     },
+    enabled,
   })
 }
 
-export function useMyLeaveBalances() {
+export function useMyLeaveBalances(enabled = true) {
   return useQuery({
     queryKey: ['leave-balances-me'],
     queryFn: async () => {
       const { data } = await apiClient.get<ApiResponse<LeaveBalanceItem[]>>('/leave/balances/me')
       return data.data
     },
+    enabled,
   })
 }
 

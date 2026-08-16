@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { useAuth } from '@/lib/auth-context'
 import { useTheme } from '@/lib/theme-context'
 import { getDefaultRouteForRole } from '@/lib/routing'
-import { LayoutDashboard, Users, Building2, LogOut, Sun, Moon, User, Settings, History, Clock, CalendarDays, Wallet } from 'lucide-react'
+import { LayoutDashboard, Users, Building2, LogOut, Sun, Moon, User, Settings, History, Clock, CalendarDays, Wallet, KeyRound } from 'lucide-react'
 
 const navItems = [
   { to: '/app/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'HR', 'MANAGER'] },
@@ -15,6 +15,7 @@ const navItems = [
    { to: '/app/attendance', label: 'Attendance', icon: Clock, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
     { to: '/app/leave', label: 'Leave', icon: CalendarDays, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
      { to: '/app/payroll', label: 'Payroll', icon: Wallet, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
+     { to: '/app/accounts', label: 'Accounts', icon: KeyRound, roles: ['ADMIN', 'IT_ADMIN'] }
 ]
 
 export function Sidebar() {
