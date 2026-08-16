@@ -19,7 +19,7 @@ export default function AccountsPage() {
     if (!employeeId) return
     setError(null)
     try {
-      await linkMutation.mutateAsync({ userId, employeeId })
+      await linkMutation.mutateAsync({ id: userId, employeeId })
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {
