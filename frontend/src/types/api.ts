@@ -143,8 +143,8 @@ export interface UserAccount {
   createdAt: string
 }
 
-export type AuditEntityType = 'EMPLOYEE' | 'DEPARTMENT' | 'USER_ACCOUNT'
-export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'RESTORE' | 'DEACTIVATE' | 'ROLE_CHANGE' | 'LOGIN'
+export type AuditEntityType = 'EMPLOYEE' | 'DEPARTMENT' | 'USER_ACCOUNT' | 'ATTENDANCE' | 'LEAVE_REQUEST' | 'HOLIDAY' | 'PAYROLL'
+export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'RESTORE' | 'DEACTIVATE' | 'ROLE_CHANGE' | 'LOGIN' | 'APPROVE' | 'REJECT'
 
 export interface AuditLogEntry {
   id: string

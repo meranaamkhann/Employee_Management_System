@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
-import { History, UserCircle, Building2, KeyRound } from 'lucide-react'
+import { History, UserCircle, Building2, KeyRound, Clock, CalendarDays, PartyPopper, Wallet } from 'lucide-react'
 import { useAuditLogs } from '@/hooks/use-audit-logs'
 import { Card } from '@/components/ui/Card'
 import { Select } from '@/components/ui/Select'
@@ -14,6 +14,10 @@ const entityIcons: Record<AuditEntityType, typeof UserCircle> = {
   EMPLOYEE: UserCircle,
   DEPARTMENT: Building2,
   USER_ACCOUNT: KeyRound,
+  ATTENDANCE: Clock,
+  LEAVE_REQUEST: CalendarDays,
+  HOLIDAY: PartyPopper,
+  PAYROLL: Wallet,
 }
 
 const actionStyles: Record<AuditAction, string> = {
@@ -24,6 +28,8 @@ const actionStyles: Record<AuditAction, string> = {
   DEACTIVATE: 'text-signal-rose bg-signal-rose/10',
   ROLE_CHANGE: 'text-signal-amber bg-signal-amber/10',
   LOGIN: 'text-ink-600 bg-paper-200 dark:text-paper-300/70 dark:bg-ink-800',
+  APPROVE: 'text-signal-green bg-signal-green/10',
+  REJECT: 'text-signal-rose bg-signal-rose/10',
 }
 
 export default function ActivityPage() {
@@ -52,6 +58,10 @@ export default function ActivityPage() {
           <option value="EMPLOYEE">Employees</option>
           <option value="DEPARTMENT">Departments</option>
           <option value="USER_ACCOUNT">Accounts</option>
+          <option value="ATTENDANCE">Attendance</option>
+          <option value="LEAVE_REQUEST">Leave</option>
+          <option value="HOLIDAY">Holidays</option>
+          <option value="PAYROLL">Payroll</option>
         </Select>
       </div>
 
@@ -63,7 +73,7 @@ export default function ActivityPage() {
         ) : (
           <div className="px-6 py-2">
             {data.content.map((entry, i) => {
-              const Icon = entityIcons[entry.entityType]
+              const Icon = entityIcons[entry.entityType] ?? History
               const isLast = i === data.content.length - 1
               return (
                 <motion.div
@@ -81,7 +91,7 @@ export default function ActivityPage() {
                   </div>
                   <div className="min-w-0 flex-1 pt-0.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${actionStyles[entry.action]}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${actionStyles[entry.action] ?? 'text-ink-600 bg-paper-200 dark:text-paper-300/70 dark:bg-ink-800'}`}>
                         {entry.action.replace('_', ' ')}
                       </span>
                       <p className="text-sm text-ink-900 dark:text-paper-50">{entry.summary ?? entry.entityType}</p>

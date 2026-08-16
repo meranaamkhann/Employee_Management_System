@@ -16,6 +16,7 @@ import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
 import AttendancePage from '@/pages/attendance/AttendancePage'
 import LeavePage from '@/pages/leave/LeavePage'
 import PayrollPage from '@/pages/payroll/PayrollPage'
+import AccountsPage from '@/pages/accounts/AccountsPage'
 
 export default function App() {
   return (
@@ -51,6 +52,7 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
+      <Route path="accounts" element={<AccountsPage />} />
     </Routes>
   )
 }
