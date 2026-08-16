@@ -10,13 +10,13 @@ import DepartmentsPage from '@/pages/departments/DepartmentsPage'
 import ProfilePage from '@/pages/profile/ProfilePage'
 import SettingsPage from '@/pages/settings/SettingsPage'
 import ActivityPage from '@/pages/activity/ActivityPage'
+import AccountsPage from '@/pages/accounts/AccountsPage'
 import NotFoundPage from '@/pages/errors/NotFoundPage'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
 import AttendancePage from '@/pages/attendance/AttendancePage'
 import LeavePage from '@/pages/leave/LeavePage'
 import PayrollPage from '@/pages/payroll/PayrollPage'
-import AccountsPage from '@/pages/accounts/AccountsPage'
 
 export default function App() {
   return (
@@ -41,9 +41,12 @@ export default function App() {
 
           <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'IT_ADMIN']} />}>
             <Route path="activity" element={<ActivityPage />} />
+            <Route path="accounts" element={<AccountsPage />} />
           </Route>
 
-          {/* Attendance / Leave / Payroll */}
+          {/* Attendance / Leave / Payroll — open to every authenticated role;
+              each page internally shows self-service UI vs. admin UI based
+              on the user's role and whether they have a linked employee. */}
           <Route path="attendance" element={<AttendancePage />} />
           <Route path="leave" element={<LeavePage />} />
           <Route path="payroll" element={<PayrollPage />} />
@@ -52,7 +55,6 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
-      <Route path="accounts" element={<AccountsPage />} />
     </Routes>
   )
 }
