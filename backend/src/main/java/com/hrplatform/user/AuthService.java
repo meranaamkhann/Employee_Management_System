@@ -5,6 +5,7 @@ import com.hrplatform.audit.AuditEntityType;
 import com.hrplatform.audit.AuditService;
 import com.hrplatform.common.ApiException;
 import com.hrplatform.common.ErrorCode;
+import com.hrplatform.employee.EmployeeRepository;
 import com.hrplatform.security.JwtService;
 import com.hrplatform.security.RevokedToken;
 import com.hrplatform.security.RevokedTokenRepository;
@@ -42,6 +43,7 @@ public class AuthService {
     private final com.hrplatform.email.EmailService emailService;
     private final com.hrplatform.config.AppProperties appProperties;
     private final RevokedTokenRepository revokedTokenRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
@@ -86,6 +88,23 @@ public class AuthService {
         auditService.record(AuditEntityType.USER_ACCOUNT, saved.getId(), AuditAction.CREATE,
                 "Self-registered as " + saved.getEmail());
         return issueTokens(saved);
+    }
+
+    /**
+     * Called right after a new User is created. If HR already has an
+     * Employee record with this exact email, and nobody else has claimed
+     * it yet, link the two automatically. This is what turns "create an
+     * account" into "start using the product" without an admin having to
+     * manually connect the two in the Accounts screen every time.
+     */
+    private void tryAutoLinkEmployee(User user) {
+        employeeRepository.findByEmailIgnoreCaseAndDeletedFalse(user.getEmail())
+                .filter(employee -> !userRepository.existsByEmployeeId(employee.getId()))
+                .ifPresent(employee -> {
+                    user.setEmployee(employee);
+                    userRepository.save(user);
+                    log.info("Auto-linked new account {} to employee {}", user.getEmail(), employee.getEmployeeCode());
+                });
     }
 
         @Transactional

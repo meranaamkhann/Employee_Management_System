@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface EmployeeRepository extends JpaRepository<Employee, String>, JpaSpecificationExecutor<Employee> {
 
     Optional<Employee> findByIdAndDeletedFalse(String id);
+    Optional<Employee> findByEmailIgnoreCaseAndDeletedFalse(String email);
 
     boolean existsByEmailIgnoreCaseAndDeletedFalse(String email);
     boolean existsByEmailIgnoreCaseAndIdNotAndDeletedFalse(String email, String id);
