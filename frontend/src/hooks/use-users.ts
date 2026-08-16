@@ -14,6 +14,13 @@ export interface AccountUser {
   createdAt: string
 }
 
+export interface CreateUserPayload {
+  email: string
+  password: string
+  role: string
+  employeeId?: string
+}
+
 export function useUsers() {
   return useQuery({
     queryKey: ['users'],
@@ -21,6 +28,37 @@ export function useUsers() {
       const { data } = await apiClient.get<ApiResponse<AccountUser[]>>('/users')
       return data.data
     },
+  })
+}
+
+export function useCreateUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: CreateUserPayload) => {
+      const { data } = await apiClient.post<ApiResponse<AccountUser>>('/users', payload)
+      return data.data
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+  })
+}
+
+export function useDeactivateUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      await apiClient.post(`/users/${userId}/deactivate`)
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+  })
+}
+
+export function useChangeUserRole() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, role }: { id: string; role: string }) => {
+      await apiClient.patch(`/users/${id}/role`, { role })
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   })
 }
 
