@@ -20,7 +20,7 @@ export function getFieldErrors(error: unknown): Record<string, string> | undefin
 
 export function formatCurrency(amount: number | undefined | null): string {
   if (amount == null) return '—'
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount)
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount)
 }
 
 export function formatDate(iso: string | undefined | null): string {

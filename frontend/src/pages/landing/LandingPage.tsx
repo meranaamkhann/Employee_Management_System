@@ -77,7 +77,7 @@ export default function LandingPage() {
 
 function Hero() {
   const { user } = useAuth()
-  const ctaHref = user ? getDefaultRouteForRole(user.role) : '/login'
+  const ctaHref = user ? getDefaultRouteForRole(user.role) : '/register'
   return (
     <section className="relative overflow-hidden pb-28 pt-40">
       <div className="noise absolute inset-0" />
@@ -326,7 +326,7 @@ function Pricing() {
     <section id="pricing" className="mx-auto max-w-6xl px-6 py-28">
       <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} className="mx-auto max-w-xl text-center">
         <h2 className="font-display text-3xl text-paper-50 sm:text-4xl">Simple, per-employee pricing</h2>
-        <p className="mt-4 text-paper-300/70">No setup fees. Cancel anytime.</p>
+        <p className="mt-4 text-paper-300/70">Payments aren't live yet — sign up free during our beta.</p>
       </motion.div>
 
       <motion.div
@@ -363,7 +363,7 @@ function Pricing() {
                 plan.highlighted ? 'bg-brass-400 text-ink-950' : 'bg-white/10 text-paper-50'
               }`}
             >
-              Get started
+               Try it free
             </Link>
           </motion.div>
         ))}

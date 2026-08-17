@@ -108,13 +108,12 @@ export default function LoginPage() {
           <p className="mt-6 text-center text-sm text-ink-600 dark:text-paper-300/60">
             Don't have an account?{' '}
             <Link to="/register" className="font-medium text-ink-900 underline dark:text-paper-50">
-              Sign up
+              Create account
             </Link>
           </p>
 
-          <p className="mt-6 text-xs text-ink-600 dark:text-paper-300/50">
-            Demo credentials: <span className="font-mono">admin@hrplatform.local</span> — ask your admin
-            for the seeded password.
+          <p className="mt-6 text-center text-xs text-ink-600 dark:text-paper-300/50">
+            By signing in you agree to Rosterly's Terms and Privacy Policy.
           </p>
         </motion.div>
       </div>
