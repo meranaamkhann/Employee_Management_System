@@ -674,20 +674,6 @@ Docker must be running for Testcontainers-based tests.
 
 ---
 
-# Code Coverage
-
-JaCoCo is used for backend code coverage.
-
-After running tests:
-
-```text
-backend/target/site/jacoco/index.html
-```
-
-The coverage report is also collected by CI.
-
----
-
 # CI/CD
 
 GitHub Actions automates the project's validation and build process.
@@ -925,51 +911,10 @@ Install:
 ## Clone
 
 ```bash
-git clone <GITHUB_REPO_URL>
+git clone <https://github.com/meranaamkhann/Employee_Management_System>
 
 cd Employee_Management_System
 ```
-
----
-
-## Environment Configuration
-
-Copy the example environment file:
-
-```bash
-cp .env.example .env
-```
-
-Windows PowerShell:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-At minimum configure:
-
-```env
-JWT_SECRET=your-long-random-secret
-
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=your-strong-password
-```
-
-Optional integrations:
-
-```env
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-
-RESEND_API_KEY=
-MAIL_FROM_ADDRESS=
-MAIL_FROM_NAME=
-```
-
-Never commit real credentials.
-
----
 
 # Docker Development
 
@@ -1337,18 +1282,3 @@ This project is currently a portfolio project.
 If distributing the repository publicly, add the appropriate license here.
 
 ---
-
-## Author
-
-**Asad Khan**
-
-B.Tech IT — Final Year
-
-Interested in:
-
-* Java Backend Development
-* Spring Boot
-* Distributed Systems
-* Databases
-* AI/ML
-* Software Engineering
