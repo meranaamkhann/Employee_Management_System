@@ -363,7 +363,7 @@ function Pricing() {
                 plan.highlighted ? 'bg-brass-400 text-ink-950' : 'bg-white/10 text-paper-50'
               }`}
             >
-               Try it free
+              Get started
             </Link>
           </motion.div>
         ))}
